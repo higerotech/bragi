@@ -34,7 +34,7 @@ Bragi corre en midgard con:
 - `cpu_shares: 512`: si algo del host pelea por CPU, Bragi cede primero.
 - `mem_limit: 2g` y `pids_limit: 512`.
 - Política de clientes que empuja a reproducción directa: sin límite de bitrate remoto por
-  debajo del máximo de la biblioteca (4 Mbps) y como mucho 2 sesiones por cuenta familiar.
+  debajo del máximo de la biblioteca (4 Mbps). Sin límite de sesiones por cuenta familiar.
 
 ## Alternativas consideradas
 | Opción | Pros | Contras |

@@ -4,7 +4,7 @@
 * **Fecha:** 2026-09-17
 * **Decisores:** Jeremi
 * **Fase AI-DLC:** 02-design
-* **Versión:** 0.3.0-dev
+* **Versión:** 0.3.0
 * **Gate:** 1
 
 Bragi no tiene código de dominio propio: es **configuración y operación** de un producto
