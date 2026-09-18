@@ -10,6 +10,8 @@ El cierre de cada gate AI-DLC corta versión (Gate 0 → 0.1.0, Gate 1 → 0.2.0
 ## [Unreleased]
 
 ### Desplegado
+- Políticas aplicadas en producción y verificación completa en verde con la cuenta real del
+  operador (admin bloqueado desde fuera de la LAN: 403).
 - **Bragi en producción desde el 2026-09-18 03:36 UTC**, desplegado por el receptor
   (`sha-b1dd0f2`). Corte desde el Jellyfin manual en 5 min 33 s, conservando base, usuarios e
   identidad del servidor.
