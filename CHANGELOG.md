@@ -24,7 +24,8 @@ El cierre de cada gate AI-DLC corta versión (Gate 0 → 0.1.0, Gate 1 → 0.2.0
 ### Pendiente
 - **H5: el transcode con `cpus: 3.0` no llega a tiempo real en el appliance:** 0,78x con el
   Jellyfin manual escaneando y **0,92x sin contención** (producción pausada 82 s con autorización).
-  RF03 queda pendiente de decisión.
+  Con preset `superfast` y el mismo tope: **1,13x**; con `veryfast` y 4 CPU: 1,11x. RF03 queda
+  pendiente de decisión.
 - **H4:** arranque tras apagón sin probar; pasa al Gate 4.
 
 ## [0.3.0] - 2026-09-17

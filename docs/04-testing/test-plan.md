@@ -65,6 +65,9 @@ C4Container
 | P1 | `politicas.sh --verificar` sin deriva | RS02, RS03 | ✅ |
 | C1 | Transcode HEVC 10 bit → H.264 1080p con `cpus: 3.0`, con el escaneo de producción en marcha | RF03 | ❌ 0,78x |
 | C1b | Ídem **sin contención** (Jellyfin de producción pausado 82 s con autorización de Jeremi, sin clientes conectados) | RF03 | ❌ **0,92x** |
+| C1c | Preset **`superfast`**, `cpus: 3.0`, sin contención (segunda pausa autorizada, 124 s) | RF03 | ✅ **1,13x** |
+| C1d | Comparación: preset `veryfast`, `cpus: 4.0`, sin contención | RF03 | ✅ 1,11x |
+| C2b | Heimdall durante C1c y C1d | RNF02 | ✅ 0 alertas; las 9 sondas con mínimo 1 en 5 min |
 | C2 | Heimdall durante el transcode | RNF02 | ✅ 0 alertas; todas las sondas en 1 |
 
 ## Hallazgos del Gate 3
@@ -72,7 +75,7 @@ C4Container
 | ID | Hallazgo | Estado |
 |---|---|---|
 | H4 | **No probado aún: arranque tras un apagón.** Yggdrasil descubrió (su TA-13) que Docker no reaplica `restart: unless-stopped` a un contenedor que falla durante la restauración tras un apagado sucio. Bragi tiene un motivo extra para fallar ahí: si el automount NFS no está listo, runc no puede hacer el bind de `/media` y el contenedor no arranca | Gate 4: unidad de arranque equivalente a `yggdrasil-arranque.service` y prueba de reinicio con HITL |
-| H5 | **RF03 falla bajo contención: 0,78x.** Durante la prueba, el Jellyfin manual de producción estaba en su primer escaneo (≈28 % de CPU sostenida, 16 % de iowait) y un contenedor de otro stack tuvo un pico del 95 %. La carga del host era 2,6 **antes** de empezar. La estimación de diseño (~1,25x) salía de una medida sin contención | **Medida limpia hecha (C1b): 0,92x.** El tope de 3.0 no sostiene un transcode HEVC 10 bit a 1080p ni con el host libre. La estimación de ~1,25x extrapolaba linealmente una medida sin tope que, al parecer, se hizo con otro fichero. Decisión de diseño pendiente (HITL) |
+| H5 | **RF03 falla bajo contención: 0,78x.** Durante la prueba, el Jellyfin manual de producción estaba en su primer escaneo (≈28 % de CPU sostenida, 16 % de iowait) y un contenedor de otro stack tuvo un pico del 95 %. La carga del host era 2,6 **antes** de empezar. La estimación de diseño (~1,25x) salía de una medida sin contención | **Medido sin contención:** `veryfast` con 3.0 da 0,92x; **`superfast` con 3.0 da 1,13x**, algo mejor incluso que `veryfast` sin tope efectivo (4.0: 1,11x). La estimación de ~1,25x venía de otro fichero. El margen es estrecho (13 %): con un escaneo en marcha no llegaría. Decisión de diseño pendiente (HITL) |
 
 **Lectura de H5 para el diseño, sea cual sea la repetición:** mientras Jellyfin escanea, un
 transcode no llega a tiempo real con el tope actual. El escaneo inicial es puntual, pero los
@@ -82,5 +85,6 @@ debía: el router no se enteró (C2).
 
 ## Pendiente para cerrar el Gate 3
 - [x] Repetir C1 sin contención (H5): 0,92x.
-- [ ] **HITL:** decidir con ese dato cómo se cumple RF03 (o si se revisa).
+- [x] Medir alternativas sin contención: `superfast` a 3.0 = 1,13x; `veryfast` a 4.0 = 1,11x.
+- [ ] **HITL:** decidir cómo se cumple RF03. Recomendación: `superfast` manteniendo el tope de 3.0.
 - [ ] Ejecutar el CI sobre esta rama.
