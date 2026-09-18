@@ -28,6 +28,11 @@ despliega y, si el health falla, vuelve al commit anterior.
 
 ## Consecuencias
 - Positivas: rollback trivial por commit; ninguna dependencia de nubes para autenticar.
+- **Decisión de versión (HITL 2026-09-17, hallazgo H1):** se queda la 10.11.11 mientras Bragi sea
+  solo LAN. Antes de activar el túnel (Gate 4) se decide entre 10.11.11 y 12.x con estos datos: el
+  bloqueo por intentos no funciona en 10.11.11 (jellyfin#17278), la 12.0 tiene un OOM en
+  `/UserViews` (#17871) y la 12.1 un informe abierto de corrupción de la base (#18100). Si se sube,
+  hacerlo con la base aún pequeña y con respaldo previo, y convertir P9 en prueba obligatoria.
 - Negativas: la actualización es manual (un PR). Jellyfin migra su base de datos entre minors,
   así que **antes de subir de minor hay que respaldar `/var/lib/bragi/config`**: el rollback de
   la imagen no deshace una migración de esquema.

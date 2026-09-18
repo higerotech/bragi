@@ -4,7 +4,7 @@
 * **Fecha:** 2026-09-17
 * **Decisores:** Jeremi
 * **Fase AI-DLC:** 01-requirements
-* **Versión:** 0.1.0
+* **Versión:** 0.1.1
 * **Gate:** 0
 * **Feature ID:** BRG-001
 * **ASVS:** L1 (V2 autenticación, V3 sesiones, V4 control de acceso, V9 comunicaciones, V14 configuración)
@@ -39,7 +39,7 @@ transcode, HEVC por hardware, DLNA, plugins de terceros y Live TV.
 | RNF01 | Bragi no pasa de 3 hilos de 4 ni de 2 GiB de RAM (tope de cgroup, no buena voluntad) |
 | RNF02 | Durante un transcode, las sondas de Heimdall no registran pérdida atribuible a CPU |
 | RNF03 | Arranca solo tras un apagón (midgard no tiene UPS) |
-| RNF04 | Como máximo 2 sesiones de reproducción simultáneas por cuenta familiar |
+| RNF04 | ~~Como máximo 2 sesiones de reproducción simultáneas por cuenta familiar~~ **Sin límite de sesiones por cuenta** (revisado por HITL el 2026-09-17, hallazgo H2): el límite de Jellyfin cuenta dispositivos con sesión, no reproducciones, y la protección del router ya la dan los topes de RNF01 |
 
 ## Requisitos de seguridad (ASVS L1)
 | ID | Requisito | ASVS | OWASP Top 10:2025 |
@@ -60,7 +60,7 @@ transcode, HEVC por hardware, DLNA, plugins de terceros y Live TV.
 | AB01 | Un bot en internet prueba contraseñas contra `/Users/AuthenticateByName` a través del túnel | RS03, RS09 |
 | AB02 | Con credenciales de un familiar, alguien intenta entrar al panel de administración | RS02, perfil sin privilegios |
 | AB03 | Un atacante manda `X-Forwarded-For: 192.0.2.50` para parecer de la LAN y saltarse RS02 | RS04 |
-| AB04 | Un usuario remoto con límite de bitrate fuerza transcodes y se come la CPU del router | Tope RNF01, bitrate remoto sin límite bajo, RNF04 |
+| AB04 | Un usuario remoto con límite de bitrate fuerza transcodes y se come la CPU del router | Tope RNF01, bitrate remoto sin límite bajo |
 | AB05 | Una vulnerabilidad de Jellyfin da ejecución en el contenedor e intenta tocar la biblioteca o el host | RS05, RS08, red propia |
 | AB06 | Tráfico de vídeo por el CDN gratuito de Cloudflare dispara la suspensión por sus términos | Decisión HITL en ADR-0004 |
 | AB07 | Un equipo cualquiera de la LAN monta el export NFS de la biblioteca | Export restringido a la IP del appliance en el NAS (T7) |

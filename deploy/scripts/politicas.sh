@@ -7,7 +7,8 @@
 #
 #   Administradores  EnableRemoteAccess=false (RS02), LoginAttemptsBeforeLockout=5 (RS03)
 #   Resto            EnableRemoteAccess=true, LoginAttemptsBeforeLockout=5, MaxActiveSessions=2
-#                    (RNF04), RemoteClientBitrateLimit=0: sin limite, para no forzar transcodes
+#                    (0 = sin limite, RNF04 revisado), RemoteClientBitrateLimit=0: sin limite,
+#                    para no forzar transcodes
 #                    (AB04)
 #   Todas            con contrasena (RS09; la longitud no es visible por la API)
 #   Servidor         RemoteClientBitrateLimit=0 (AB04)
@@ -23,10 +24,10 @@ set -uo pipefail
 URL="${JELLYFIN_URL:?define JELLYFIN_URL}"
 TOKEN="${JELLYFIN_TOKEN:?define JELLYFIN_TOKEN con una API key de Jellyfin}"
 INTENTOS=5
-# OJO: MaxActiveSessions cuenta SESIONES ABIERTAS (dispositivos con la sesion iniciada), no
-# reproducciones simultaneas. Con 2, una persona con TV, movil y tablet no puede entrar en el
-# tercero. Pendiente de revisar RNF04 (ver hallazgo H2 en el threat model). 0 = sin limite.
-SESIONES="${BRAGI_SESIONES_MAX:-2}"
+# MaxActiveSessions cuenta SESIONES ABIERTAS (dispositivos con la sesion iniciada), no
+# reproducciones simultaneas: con 2, una persona con TV, movil y tablet no entraria en el tercero.
+# Por eso RNF04 se reviso a sin limite (H2, HITL 2026-09-17). 0 = sin limite.
+SESIONES="${BRAGI_SESIONES_MAX:-0}"
 
 aplicar=0
 [ "${1:-}" = "--aplicar" ] && aplicar=1

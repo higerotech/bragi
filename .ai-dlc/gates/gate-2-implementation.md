@@ -9,10 +9,11 @@
 - [x] Secretos: gitleaks en CI
 - [x] Cadena de suministro: Trivy (config e imágenes) como informe semanal
 - [x] Workflow `build` para el receptor (imagen `bragi-sync`, redespliegue si cambia el Compose)
-- [ ] Primera ejecución verde del CI en GitHub (se ve en el PR)
-- [ ] `docs/03-implementation/repo-history.md` generado con `gitgraph_from_log.py` tras fusionar
-      en `develop` (derivarlo en una rama de feature capturaría commits sin fusionar)
-- [ ] **HITL H1**: versión de Jellyfin (seguir en 10.11.11 aceptando el bloqueo roto, o subir)
-- [ ] **HITL H2**: RNF04 (`MaxActiveSessions` cuenta dispositivos con sesión, no reproducciones)
+- [x] Primera ejecución verde del CI en GitHub (PR #5, run 35297591676)
+- [x] `docs/03-implementation/repo-history.md` generado con `gitgraph_from_log.py` sobre `develop`
+      tras fusionar #5
+- [x] **HITL H1**: 10.11.11 mientras sea solo LAN; la versión se decide antes del túnel (Gate 4)
+- [x] **HITL H2**: RNF04 revisado, sin límite de sesiones (`BRAGI_SESIONES_MAX=0` por defecto)
 
 Evidencia: salida de `prueba-proxy.sh` en el job `integracion` del CI; C4 Container actualizado.
+**Aprobado 2026-09-17.** Cortado `0.3.0`.
