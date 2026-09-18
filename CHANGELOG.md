@@ -9,6 +9,20 @@ El cierre de cada gate AI-DLC corta versión (Gate 0 → 0.1.0, Gate 1 → 0.2.0
 
 ## [Unreleased]
 
+### Añadido
+- **Observabilidad en Heimdall (Gate 5, ADR-0009).** Recolector en el host cada 30 s que lee el
+  cgroup de Bragi (CPU incluidos los `ffmpeg`, throttling, memoria anónima), cuenta los
+  transcodes, comprueba `/health` en la LAN y desde fuera, y lee el estado del último respaldo.
+  Lo sirve `bragi-metricas` (busybox `httpd`, perfil `metricas`) solo en la red
+  `yggdrasil_heimdall`.
+- Especificación para Heimdall en `deploy/prometheus/`: job, reglas de registro y 8 alertas, con
+  pruebas unitarias de `promtool` en el CI.
+- `docs/06-monitoring/observability.md` con C4 Dynamic, secuencia, estado del incidente y timeline.
+
+### Cambiado
+- `respaldar.sh` escribe `/var/lib/bragi-respaldo/ultimo-exito` tras cada respaldo verificado.
+- `bragi-sync` incluye `busybox-extras` (el `httpd` de `bragi-metricas`).
+
 ## [0.5.0] - 2026-09-18
 
 **Gate 4 (Deployment) aprobado.** Bragi en producción, desplegado por el receptor, con acceso

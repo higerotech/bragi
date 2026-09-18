@@ -44,6 +44,9 @@ deploy/
     prueba-proxy.sh     # integracion: ataca la frontera de confianza con Jellyfin real
     prueba-appliance.sh # verificacion en el appliance (staging o produccion)
   cd/                   # bootstrap, migracion y unidad de arranque (Gate 4)
+  respaldo/             # respaldo nocturno al NAS (ADR-0008)
+  metricas/             # recolector para Heimdall (Gate 5, ADR-0009)
+  prometheus/           # job, reglas y pruebas que se instalan en Yggdrasil
 docs/
   00-project/           # charter, glosario, clasificación, ADRs
   01-requirements/      # PRD con abuso, ASVS y threat assessment

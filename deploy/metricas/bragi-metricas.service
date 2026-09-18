@@ -1,0 +1,10 @@
+[Unit]
+Description=Bragi: recolecta metricas para Heimdall
+Documentation=https://github.com/higerotech/bragi/blob/main/docs/06-monitoring/observability.md
+After=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/bragi-recolectar.sh
+Nice=10
+TimeoutStartSec=60

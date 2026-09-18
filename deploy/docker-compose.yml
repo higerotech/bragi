@@ -157,7 +157,34 @@ services:
       driver: json-file
       options: {max-size: "10m", max-file: "3"}
 
+  # --- Metricas para Heimdall (ADR-0009) ---
+  # Sirve el textfile que escribe bragi-metricas.timer en el host. Solo en la red de Heimdall:
+  # sin puertos publicados ni reglas nuevas en el firewall del router. Perfil `metricas`.
+  metricas:
+    image: ghcr.io/higerotech/bragi-sync:${IMAGE_TAG:?IMAGE_TAG es obligatorio}
+    container_name: bragi-metricas
+    profiles: [metricas]
+    entrypoint: ["httpd", "-f", "-p", "9470", "-h", "/www"]
+    user: "65534:65534"
+    restart: unless-stopped
+    read_only: true
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+    cpus: 0.1
+    mem_limit: 16m
+    volumes:
+      - ${BRAGI_METRICAS_DIR:-/var/lib/bragi-metricas}:/www:ro
+    networks: [heimdall]
+    logging:
+      driver: json-file
+      options: {max-size: "1m", max-file: "2"}
+
 networks:
+  # Red de Yggdrasil: la crea su compose. Solo la usa el perfil `metricas`, asi que sin ese
+  # perfil Bragi no depende de que Yggdrasil exista.
+  heimdall:
+    name: ${HEIMDALL_RED:-yggdrasil_heimdall}
+    external: true
   bragi:
     name: bragi
     ipam:
