@@ -1,10 +1,10 @@
 # Arquitectura — Bragi
 
-* **Estado:** review
+* **Estado:** approved (Gate 1, 2026-09-17)
 * **Fecha:** 2026-09-17
 * **Decisores:** Jeremi
 * **Fase AI-DLC:** 02-design
-* **Versión:** 0.1.0
+* **Versión:** 0.3.0
 * **Gate:** 1
 
 Bragi no tiene código de dominio propio: es **configuración y operación** de un producto
@@ -26,6 +26,7 @@ C4Container
 
     System_Boundary(midgard, "midgard (appliance y router)") {
         Container(sync, "bragi-sync", "Alpine + git", "Un solo uso: checkout del commit desplegado")
+        Container(config, "bragi-config", "Alpine, misma imagen", "Un solo uso: escribe network.xml (ADR-0006)")
         Container(jf, "bragi", "Jellyfin 10.11.11", "Biblioteca, cuentas, streaming. Topes: 3 CPU, 2 GiB")
         Container(tunel, "bragi-tunel", "cloudflared 2026.8.3", "Túnel saliente; perfil tunel")
         ContainerDb(db, "/var/lib/bragi", "SQLite en HDD local", "Config, usuarios, metadatos")
@@ -39,6 +40,7 @@ C4Container
     Rel(jf, db, "Lee y escribe")
     Rel(jf, nas, "Lee", "NFS v3 solo lectura, rslave")
     Rel(receptor, sync, "Lanza con IMAGE_TAG", "docker compose")
+    Rel(config, db, "Escribe network.xml")
 
     UpdateElementStyle(jf, $bgColor="#1168bd", $fontColor="#ffffff")
     UpdateLayoutConfig($c4ShapeInRow="3", $c4BoundaryInRow="1")
@@ -82,7 +84,9 @@ KnownProxies, Jellyfin usa la IP del socket y la cabecera se ignora (AB03).*
 stateDiagram-v2
     [*] --> Sincronizando: receptor lanza IMAGE_TAG
     Sincronizando --> Fallido: commit no está en origin/main
-    Sincronizando --> Arrancando: checkout OK
+    Sincronizando --> Configurando: checkout OK
+    Configurando --> Fallido: LAN_SUBNET o TUNEL_IP inválidos
+    Configurando --> Arrancando: network.xml escrito
     Arrancando --> Fallido: NFS no monta (runc no hace el bind)
     Arrancando --> Sano: /health 200 antes de 300 s
     Arrancando --> Fallido: health_timeout
@@ -96,8 +100,8 @@ stateDiagram-v2
 ## Despliegue
 1. Push a `main` → workflow `build` publica `bragi-sync:sha-<7>`.
 2. El `workflow_run` firmado llega al receptor por `deploy.<dominio>`.
-3. Receptor: `docker compose -p bragi pull` + `up -d` con `IMAGE_TAG`. `sync` hace el checkout;
-   Jellyfin arranca cuando `sync` termina bien.
+3. Receptor: `docker compose -p bragi pull` + `up -d` con `IMAGE_TAG`. `sync` hace el checkout,
+   `config` escribe `network.xml` y Jellyfin se recrea cuando ambas terminan bien.
 4. Health `http://<IP LAN>:8096/health`; si falla, rollback al tag anterior.
 
 Bootstrap único en el servidor (runbook de Gate 4): clon en `/srv/apps/bragi` (deploy:deploy

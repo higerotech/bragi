@@ -9,20 +9,24 @@ repo hermano de [Yggdrasil](https://github.com/higerotech/yggdrasil) (monitor de
 de [Fenrir](https://github.com/higerotech/fenrir) (NVR), y sigue su convención de nombres.
 
 ## Estado
-Gate 0 y Gate 1 en revisión. El acceso externo (ADR-0004) espera decisión.
+Gates 0 a 3 aprobados (0.4.0). Siguiente: Gate 4, despliegue con el receptor.
 
 | Gate | Estado |
 |---|---|
-| 0 Requirements | Artefactos listos; falta HITL |
-| 1 Design | Bloqueado por ADR-0004 (túnel y términos de Cloudflare) |
-| 2–5 | Pendientes |
+| 0 Requirements | Aprobado 2026-09-17 (0.1.0) |
+| 1 Design | Aprobado 2026-09-17 (0.2.0) |
+| 2 Implementation | Aprobado 2026-09-17 (0.3.0) |
+| 3 Testing | Aprobado 2026-09-18 (0.4.0) |
+| 4–5 | Pendientes |
 
 ## Números que mandan el diseño
 Medidos en el appliance el 2026-09-17:
 
 - Reproducción directa: CPU ≈ 0; el NAS entrega 107 MB/s.
-- Transcode HEVC 10 bit → H.264 1080p por software: 1,42x sin tope, ~1,25x con `cpus: 3.0`.
-  **Cabe un transcode, no dos.**
+- Transcode HEVC 10 bit → H.264 1080p por software con `cpus: 3.0` (Gate 3, host libre): 0,92x
+  con el preset de fábrica y **1,13x con `superfast`**, que es el que se usa. **Cabe un
+  transcode, no dos**, y no mientras corre un escaneo (por eso las tareas pesadas van de
+  madrugada).
 - La iGPU (HD 2500, Gen7) no decodifica HEVC: la aceleración por hardware no ayuda aquí.
 
 ## Estructura
@@ -30,10 +34,15 @@ Medidos en el appliance el 2026-09-17:
 deploy/
   docker-compose.yml    # jellyfin + sync (+ tunel bajo perfil)
   .env.example          # copiar a deploy/.env en el servidor, 0600
-  sync/                 # imagen bragi-sync: checkout del commit desplegado
+  sync/                 # imagen bragi-sync: checkout del commit y network.xml (config.sh)
   scripts/
     probar-limites.sh   # mide si el tope de CPU sostiene un transcode
     verificar-media.sh  # comprueba el NFS antes de recrear
+    politicas.sh        # aplica y verifica las politicas de cuenta por la API
+  tests/
+    prueba-proxy.sh     # integracion: ataca la frontera de confianza con Jellyfin real
+    prueba-appliance.sh # verificacion en el appliance (staging o produccion)
+  cd/                   # bootstrap, migracion y unidad de arranque (Gate 4)
 docs/
   00-project/           # charter, glosario, clasificación, ADRs
   01-requirements/      # PRD con abuso, ASVS y threat assessment
@@ -44,7 +53,7 @@ docs/
 ## Despliegue
 Lo despliega el receptor de
 [despliegue-continuo](https://github.com/higerotech/despliegue-continuo) al fusionar en
-`main` (ADR-0003). El bootstrap del servidor está previsto para Gate 4.
+`main` (ADR-0003). Runbook completo en `docs/05-deployment/deployment.md`.
 
 ## Anonimización
 Repositorio público. No contiene IPs, MACs, hostnames ni credenciales reales: los ejemplos usan

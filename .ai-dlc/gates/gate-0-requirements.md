@@ -6,8 +6,9 @@
 - [x] Threat assessment inicial (DFD + quadrant DREAD)
 - [x] Clasificación de datos (`docs/00-project/data-classification.md`)
 - [x] Charter + glosario (lenguaje ubicuo)
-- [ ] **HITL**: validar alcance, no-scope (un transcode, sin DLNA, sin adquisición de
-      contenido) y el límite de 2 sesiones por cuenta familiar.
+- [x] **HITL**: alcance, no-scope (un transcode, sin DLNA, sin adquisición de contenido) y
+      límite de 2 sesiones por cuenta familiar validados por Jeremi el 2026-09-17.
+      *Revisado en Gate 2 (H2):* RNF04 pasa a sin límite, PRD 0.1.1.
 
 Evidencia: journey + requirementDiagram + DFD/quadrant en el PRD.
-Al aprobar: cortar `[Unreleased]` → `0.1.0` y pasar charter, glosario, clasificación y PRD a `approved`.
+**Aprobado 2026-09-17.** Cortado `0.1.0`; charter, glosario, clasificación y PRD en `approved`.
