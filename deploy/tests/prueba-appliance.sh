@@ -59,11 +59,13 @@ res N2 "KnownProxies = solo el tunel" "$TUNEL_IP" \
     "$(sed -n '/<KnownProxies>/,/<\/KnownProxies>/p' <<<"$xml" | grep -o '<string>[^<]*' | sed 's/<string>//' | tr '\n' ' ' | sed 's/ $//')"
 
 echo "== Frontera de confianza en la red real =="
-codigo_host="$(curl -s -o /tmp/bragi-login.json -w '%{http_code}' -H "Authorization: $CABECERA" \
-    -H 'Content-Type: application/json' --data-binary "$(cuerpo_login)" "$URL/Users/AuthenticateByName")"
+# El cuerpo con la clave va por stdin (@-), nunca como argumento: los argumentos se ven con ps.
+login_json="$(mktemp)"
+codigo_host="$(cuerpo_login | curl -s -o "$login_json" -w '%{http_code}' -H "Authorization: $CABECERA" \
+    -H 'Content-Type: application/json' --data-binary @- "$URL/Users/AuthenticateByName")"
 res F1 "admin desde el host (IP LAN) -> local" 200 "$codigo_host"
-token="$(python3 -c 'import json;print(json.load(open("/tmp/bragi-login.json")).get("AccessToken",""))' 2>/dev/null)"
-rm -f /tmp/bragi-login.json
+token="$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1])).get("AccessToken",""))' "$login_json" 2>/dev/null)"
+rm -f "$login_json"
 
 # Un contenedor en docker0 llega al puerto publicado con una IP 172.17.x.x: Jellyfin debe
 # tratarlo como REMOTO. Si la red Docker contara como LAN, esto entraria (RS04).
