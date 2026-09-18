@@ -10,6 +10,9 @@ El cierre de cada gate AI-DLC corta versión (Gate 0 → 0.1.0, Gate 1 → 0.2.0
 ## [Unreleased]
 
 ### Desplegado
+- **Respaldo nocturno de la configuración** (ADR-0008) al share `respaldos` del NAS: copia en
+  caliente de la base con `integrity_check`, 23 MB, 14 días, a las 05:30 de la casa y con
+  `Persistent=true` frente a apagones. Simulacro de restauración superado.
 - Políticas aplicadas en producción y verificación completa en verde con la cuenta real del
   operador (admin bloqueado desde fuera de la LAN: 403).
 - **Bragi en producción desde el 2026-09-18 03:36 UTC**, desplegado por el receptor
@@ -30,6 +33,8 @@ verificar el despliegue real (corte, políticas en producción y prueba de reini
 publica la primera `bragi-sync` para el receptor.
 
 ### Añadido
+- `deploy/respaldo/`: `respaldar.sh`, servicio y timer de systemd, e `instalar.sh` (montaje NFS
+  con automount, sin reiniciar los montajes existentes). Procedimiento de restauración en el runbook.
 - Runbook del Gate 4 (`docs/05-deployment/deployment.md`) con C4 Deployment, pipeline con rollback
   y gantt del corte.
 - `deploy/cd/bootstrap-midgard.sh`: prepara el appliance (usuario, datos, clon, `.env`,

@@ -62,11 +62,12 @@ jobs:
       - name: ShellCheck
         run: |
           docker run --rm -v "$PWD:/mnt:ro" -w /mnt koalaman/shellcheck:v0.10.0 -S warning \
-            deploy/scripts/*.sh deploy/sync/*.sh deploy/tests/*.sh deploy/cd/*.sh
+            deploy/scripts/*.sh deploy/sync/*.sh deploy/tests/*.sh deploy/cd/*.sh deploy/respaldo/*.sh
       - name: Unidad systemd (sintaxis)
         run: |
           sudo install -m 0755 /bin/true /usr/local/sbin/bragi-arranque.sh
-          systemd-analyze verify deploy/cd/bragi-arranque.service
+          sudo install -m 0755 /bin/true /usr/local/sbin/bragi-respaldar.sh
+          systemd-analyze verify deploy/cd/bragi-arranque.service deploy/respaldo/bragi-respaldo.service deploy/respaldo/bragi-respaldo.timer
 
   integracion:
     name: "Integracion: frontera de confianza (Jellyfin real)"

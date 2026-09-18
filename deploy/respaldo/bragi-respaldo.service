@@ -1,0 +1,12 @@
+[Unit]
+Description=Bragi: respaldo de la configuracion al NAS
+Documentation=https://github.com/higerotech/bragi/blob/main/docs/05-deployment/deployment.md
+After=network-online.target remote-fs.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/bragi-respaldar.sh
+Nice=10
+IOSchedulingClass=idle
+TimeoutStartSec=1800
