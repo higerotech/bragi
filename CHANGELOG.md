@@ -9,6 +9,12 @@ El cierre de cada gate AI-DLC corta versión (Gate 0 → 0.1.0, Gate 1 → 0.2.0
 
 ## [Unreleased]
 
+### Corregido
+- **`bootstrap-midgard.sh` tomaba la zona horaria del host**, que en el appliance es UTC. La
+  ventana de tareas pesadas (01:00–06:00, hora del contenedor) habría caído en plena noche en la
+  zona de la casa. Ahora se pasa `TZ_HOGAR` y el script avisa si queda en UTC. En el appliance se
+  corrigió el `.env` a mano antes del primer despliegue.
+
 ## [0.5.0-rc.1] - 2026-09-18
 
 **Candidata del Gate 4 (Deployment).** Primera release en `main`: trae los gates 0 a 3 y los

@@ -121,7 +121,7 @@ rm -rf ~/bragi-staging
 ### 4. Bootstrap del appliance
 
 ```bash
-sudo BRANCH=main bash /ruta/al/clon/deploy/cd/bootstrap-midgard.sh
+sudo BRANCH=main TZ_HOGAR=<zona de la casa> bash /ruta/al/clon/deploy/cd/bootstrap-midgard.sh
 ```
 
 Crea el usuario `bragi` (ADR-0007), `/var/lib/bragi`, el clon en `/srv/apps/bragi`,

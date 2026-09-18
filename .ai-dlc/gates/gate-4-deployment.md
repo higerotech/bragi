@@ -11,10 +11,11 @@ Runbook: `docs/05-deployment/deployment.md` (C4 Deployment, pipeline con rollbac
 - [x] Rollback de la migración documentado
 
 ## Ejecución en el appliance
-- [ ] Release a `main` y build de `bragi-sync`
-- [ ] **[Jeremi]** Paquete GHCR `bragi-sync` público
-- [ ] Desmontar el staging del Gate 3 (`~/bragi-staging`), que usa los nombres de producción
-- [ ] `bootstrap-midgard.sh`
+- [x] Release `v0.5.0-rc.1` a `main` y build de `bragi-sync` (2026-09-18)
+- [x] **[Jeremi]** Paquete GHCR `bragi-sync` público (manifest anónimo: 200)
+- [x] Staging del Gate 3 desmontado
+- [x] `bootstrap-midgard.sh` (usuario `bragi` 995:986, `/var/lib/bragi`, clon, `.env`, receptor
+      recargado con `bragi`, unidad habilitada). Corregido a mano `TZ=Etc/UTC` → zona de la casa
 - [ ] **[Jeremi]** Webhook `workflow_run` en el repo
 - [ ] Ventana de corte (autorizada por Jeremi) y primer despliegue por el receptor
 - [ ] `politicas.sh --aplicar` contra producción (API key de Jeremi) y `prueba-appliance.sh` limpio
