@@ -9,6 +9,13 @@ El cierre de cada gate AI-DLC corta versión (Gate 0 → 0.1.0, Gate 1 → 0.2.0
 
 ## [Unreleased]
 
+## [0.5.0-rc.1] - 2026-09-18
+
+**Candidata del Gate 4 (Deployment).** Primera release en `main`: trae los gates 0 a 3 y los
+artefactos de despliegue. Es candidata y no `0.5.0` porque el Gate 4 se cierra después de
+verificar el despliegue real (corte, políticas en producción y prueba de reinicio). Su build
+publica la primera `bragi-sync` para el receptor.
+
 ### Añadido
 - Runbook del Gate 4 (`docs/05-deployment/deployment.md`) con C4 Deployment, pipeline con rollback
   y gantt del corte.
@@ -126,7 +133,8 @@ El cierre de cada gate AI-DLC corta versión (Gate 0 → 0.1.0, Gate 1 → 0.2.0
   escenarios de abuso, C4 de contexto, journey, requirementDiagram, DFD y DREAD inicial.
 - Checklists de gates 0–5.
 
-[Unreleased]: https://github.com/higerotech/bragi/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/higerotech/bragi/compare/v0.5.0-rc.1...HEAD
+[0.5.0-rc.1]: https://github.com/higerotech/bragi/compare/v0.4.0...v0.5.0-rc.1
 [0.4.0]: https://github.com/higerotech/bragi/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/higerotech/bragi/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/higerotech/bragi/compare/v0.1.0...v0.2.0
