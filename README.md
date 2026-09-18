@@ -9,13 +9,14 @@ repo hermano de [Yggdrasil](https://github.com/higerotech/yggdrasil) (monitor de
 de [Fenrir](https://github.com/higerotech/fenrir) (NVR), y sigue su convención de nombres.
 
 ## Estado
-Gate 0 y Gate 1 en revisión. Acceso externo decidido: túnel en una zona aparte (ADR-0004).
+Gates 0 y 1 aprobados (0.2.0). Gate 2 en curso.
 
 | Gate | Estado |
 |---|---|
-| 0 Requirements | Artefactos listos; falta HITL |
-| 1 Design | Artefactos listos y HITL de ADR-0004 y T7 resueltos; falta la aprobación del gate |
-| 2–5 | Pendientes |
+| 0 Requirements | Aprobado 2026-09-17 (0.1.0) |
+| 1 Design | Aprobado 2026-09-17 (0.2.0) |
+| 2 Implementation | En curso |
+| 3–5 | Pendientes |
 
 ## Números que mandan el diseño
 Medidos en el appliance el 2026-09-17:

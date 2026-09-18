@@ -1,6 +1,6 @@
 # Clasificación de datos — Bragi
 
-* **Estado:** review
+* **Estado:** approved (Gate 0, 2026-09-17)
 * **Fecha:** 2026-09-17
 * **Decisores:** Jeremi
 * **Fase AI-DLC:** 00-project

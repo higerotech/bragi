@@ -14,4 +14,4 @@
 - [x] Contratos: no aplica (Bragi no publica API propia; la de Jellyfin es upstream).
 
 Evidencia: C4 + sequence + state + DFD + quadrant.
-Al aprobar: cortar `0.2.0`.
+**Aprobado 2026-09-17** por Jeremi. Cortado `0.2.0`; arquitectura y threat model en `approved`.
