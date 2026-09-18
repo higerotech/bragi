@@ -25,7 +25,10 @@ Runbook: `docs/05-deployment/deployment.md` (C4 Deployment, pipeline con rollbac
       `network.xml` con la LAN real, TZ de la casa, 0 errores en el arranque. **Mismo Id de
       servidor** que el Jellyfin manual: la base migrada cargó entera. El manual queda parado,
       sin reinicio automático y con su directorio intacto
-- [ ] `politicas.sh --aplicar` contra producción (API key de Jeremi) y `prueba-appliance.sh` limpio
+- [x] Políticas aplicadas en producción y `prueba-appliance.sh` limpio (2026-09-18), ejecutado
+      por Jeremi con su admin mediante `verificar-produccion.sh`, sin API key. Admin sin acceso
+      remoto, bloqueo a 5 intentos, `superfast`, escaneo 04:00 y personas domingo 05:00 (hora de la
+      casa). **F2: admin desde fuera de la LAN → 403.** `== bragi cumple ==`
 - [ ] **[Jeremi] H4:** prueba de reinicio con Bragi volviendo solo
 - [ ] Respaldo de `/var/lib/bragi/config` (T10), sobre todo antes de cualquier subida de versión
 
