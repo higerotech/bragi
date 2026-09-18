@@ -14,7 +14,7 @@ Gate 0 y Gate 1 en revisión. Acceso externo decidido: túnel en una zona aparte
 | Gate | Estado |
 |---|---|
 | 0 Requirements | Artefactos listos; falta HITL |
-| 1 Design | Falta restringir el export NFS del NAS (T7) |
+| 1 Design | Artefactos listos y HITL de ADR-0004 y T7 resueltos; falta la aprobación del gate |
 | 2–5 | Pendientes |
 
 ## Números que mandan el diseño

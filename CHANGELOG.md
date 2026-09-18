@@ -9,6 +9,12 @@ El cierre de cada gate AI-DLC corta versión (Gate 0 → 0.1.0, Gate 1 → 0.2.0
 
 ## [Unreleased]
 
+### Seguridad
+- **T7 cerrado:** el export NFS `media` del NAS pasa de `*` a la IP del appliance (cambio en el
+  panel del NAS, 2026-09-17). Verificado con un montaje nuevo desde el appliance (OK) y otro
+  desde un equipo de la LAN (`access denied by server`). El montaje en uso y Bragi siguieron
+  sanos.
+
 ### Cambiado
 - **ADR-0004 aceptada (opción A):** el hostname público de Bragi vive en una zona propia de
   Jeremi, distinta de `higerotech.com`. Riesgo residual documentado: la zona está en la misma
