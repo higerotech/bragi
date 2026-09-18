@@ -1,10 +1,10 @@
 # Despliegue — Bragi
 
-* **Estado:** review
+* **Estado:** approved (Gate 4, 2026-09-18)
 * **Fecha:** 2026-09-18
 * **Decisores:** Jeremi
 * **Fase AI-DLC:** 05-deployment
-* **Versión:** 0.5.0-dev
+* **Versión:** 0.5.0
 * **Gate:** 4
 
 Runbook para pasar del Jellyfin manual (`~/jellyfin`) a Bragi desplegado por el receptor de
