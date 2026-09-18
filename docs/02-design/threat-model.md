@@ -41,7 +41,7 @@ midgard; TB3 = red Docker; TB4 = midgard↔NAS.*
 | T7 | Flujo 6 | I, T | El NAS exportaba a `*`: cualquier equipo LAN montaba la biblioteca | Export restringido a la IP del appliance (2026-09-17, verificado); `verificar-media.sh` avisa si vuelve a `*` | AB07 |
 | T8 | Flujo 5 | I | Credenciales en HTTP dentro de la LAN | Aceptado (LAN de confianza, como Odín); revisable si se añade TLS local | data-classification |
 | T9 | Flujo 1 | D | Cloudflare limita la zona por servir vídeo | Zona aparte de `higerotech.com` (ADR-0004); residual: misma cuenta | AB06 |
-| T10 | DB | D | Apagón corrompe SQLite (sin UPS) | Respaldo de `/var/lib/bragi/config` antes de upgrades y periódico (Gate 4) | ADR-0001 |
+| T10 | DB | D | Apagón corrompe SQLite (sin UPS) | Respaldo nocturno verificado (`integrity_check` + sha256) con restauración probada | ADR-0001, ADR-0008 |
 | T11 | Flujo 7/8 | T | Un commit malicioso en `main` se despliega solo | Ruleset Protect-MAIN (PR obligatorio); sync solo hace checkout, no ejecuta | ADR-0003 |
 | T12 | `.env` | I | `TUNNEL_TOKEN` filtrado permite suplantar el túnel | `.env` 0600, fuera del repo; rotación en el panel de CF. **Ocurrió** el 2026-09-18 al diagnosticar el `.env` y se rotó: sobre ficheros con secretos, solo recuentos y longitudes | RS07 |
 

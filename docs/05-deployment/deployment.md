@@ -163,6 +163,27 @@ sudo env BRAGI_CONTENEDOR=bragi HOST_LAN_IP=... LAN_SUBNET=... ADMIN_USUARIO=...
 `sudo systemctl reboot` con el owner presente. Criterio: Bragi `healthy` sin intervención y
 `journalctl -u bragi-arranque` muestra la espera del NFS y la convergencia.
 
+### 9. Respaldo nocturno (ADR-0008)
+Con el share `respaldos` del NAS exportado **solo** al appliance:
+
+```bash
+sudo NAS=<ip-del-nas> bash /srv/apps/bragi/deploy/respaldo/instalar.sh
+sudo systemctl start bragi-respaldo.service          # primer respaldo
+journalctl -u bragi-respaldo -n 5 -o cat              # "integrity_check ok" y "verificado"
+```
+
+### Restaurar un respaldo
+1. `sha256sum -c` del archivo en `/mnt/nas/respaldos/bragi/`.
+2. Parar Bragi: `docker compose -p bragi -f /srv/apps/bragi/deploy/docker-compose.yml stop jellyfin`.
+3. Apartar la configuración actual, sin borrarla: `mv /var/lib/bragi/config /var/lib/bragi/config.roto-<fecha>`.
+4. `tar -C /var/lib/bragi -xzf <archivo>` y `chown -R bragi: /var/lib/bragi/config`.
+5. Arrancar con `bragi-arranque.sh`. Jellyfin vuelve a descargar las carátulas en el siguiente escaneo.
+
+**Simulacro sin tocar producción** (hecho el 2026-09-18): extraer en un directorio temporal y
+levantar la misma imagen con `--cpus 1`, `-p 127.0.0.1:18097:8096` y ese directorio como `/config`.
+Debe responder en `/System/Info/Public` con el mismo `Id` que producción y
+`StartupWizardCompleted: true`.
+
 ## Rollback de la migración
 Si Bragi no queda sano tras el corte, se vuelve al despliegue manual, que sigue intacto:
 

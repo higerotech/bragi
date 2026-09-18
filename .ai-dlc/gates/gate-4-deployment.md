@@ -30,7 +30,10 @@ Runbook: `docs/05-deployment/deployment.md` (C4 Deployment, pipeline con rollbac
       remoto, bloqueo a 5 intentos, `superfast`, escaneo 04:00 y personas domingo 05:00 (hora de la
       casa). **F2: admin desde fuera de la LAN → 403.** `== bragi cumple ==`
 - [ ] **[Jeremi] H4:** prueba de reinicio con Bragi volviendo solo
-- [ ] Respaldo de `/var/lib/bragi/config` (T10), sobre todo antes de cualquier subida de versión
+- [x] Respaldo nocturno (T10, ADR-0008): timer a las 05:30 de la casa al share `respaldos`
+      (exportado solo al appliance), base copiada en caliente y con `integrity_check`, 23 MB,
+      14 días. **Simulacro de restauración superado** (2026-09-18): mismo Id, asistente completado,
+      0 errores
 
 ## Antes de activar el perfil `tunel`
 - [x] **HITL:** versión de Jellyfin (H1): **se mantiene 10.11.11** (2026-09-18). #18100 de la 12.1
