@@ -9,6 +9,11 @@ El cierre de cada gate AI-DLC corta versión (Gate 0 → 0.1.0, Gate 1 → 0.2.0
 
 ## [Unreleased]
 
+### Desplegado
+- **Bragi en producción desde el 2026-09-18 03:36 UTC**, desplegado por el receptor
+  (`sha-b1dd0f2`). Corte desde el Jellyfin manual en 5 min 33 s, conservando base, usuarios e
+  identidad del servidor.
+
 ### Corregido
 - **`bootstrap-midgard.sh` tomaba la zona horaria del host**, que en el appliance es UTC. La
   ventana de tareas pesadas (01:00–06:00, hora del contenedor) habría caído en plena noche en la
