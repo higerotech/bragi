@@ -9,6 +9,11 @@ El cierre de cada gate AI-DLC corta versión (Gate 0 → 0.1.0, Gate 1 → 0.2.0
 
 ## [Unreleased]
 
+### Cambiado
+- **ADR-0004 aceptada (opción A):** el hostname público de Bragi vive en una zona propia de
+  Jeremi, distinta de `higerotech.com`. Riesgo residual documentado: la zona está en la misma
+  cuenta de Cloudflare (mismo par de nameservers). T9 baja en el DREAD residual.
+
 ### Añadido
 - Arranque del proyecto: charter, glosario y clasificación de datos.
 - PRD `mvp-streaming` (BRG-001) con requisitos funcionales, RNF, requisitos de seguridad ASVS L1,

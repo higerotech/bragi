@@ -1,10 +1,10 @@
 # ADR-0004: Acceso externo por Cloudflare Tunnel
 
-* **Estado:** proposed — **pendiente de decisión HITL** (bloquea Gate 1)
+* **Estado:** accepted (HITL 2026-09-17, opción A)
 * **Fecha:** 2026-09-17
 * **Decisores:** Jeremi
 * **Fase AI-DLC:** 02-design
-* **Versión:** 0.1.0
+* **Versión:** 1.0.0
 * **ID:** ADR-0004
 * **Supersede / Superseded-by:** —
 * **Controles OWASP afectados:** A01 (control de acceso), A05 (configuración), A07 (autenticación)
@@ -53,5 +53,34 @@ Si Jeremi prefiere no depender de Cloudflare para vídeo, **C** es la alternativ
 desbloquearía también el udp/51820 y las 6 reglas `wg0` que hoy existen en el firewall sin
 servicio detrás.
 
+## Decisión (HITL 2026-09-17)
+**Opción A.** Jeremi aporta un dominio propio que ya tenía registrado en Cloudflare, distinto
+del de la organización. El hostname público de Bragi vive en esa zona y no en `higerotech.com`.
+Por anonimización, el dominio real solo aparece en `deploy/.env` (`PUBLISHED_URL`) y en el panel
+de Cloudflare; aquí se escribe `media.example.com`.
+
+Comprobado el mismo día: la zona usa **el mismo par de nameservers** que `higerotech.com`, y
+Cloudflare asigna ese par por cuenta. Es decir, **zona aparte dentro de la misma cuenta**.
+
+**Riesgo residual aceptado.** Los términos hablan de limitar "your access to or use of the CDN",
+y la redacción no aclara si el alcance es la zona o la cuenta. En la práctica las limitaciones por
+este motivo se aplican al hostname o a la zona que sirve el vídeo, así que la landing y el webhook
+de despliegue quedan fuera del radio probable, pero **no garantizado**. La zona elegida también
+tiene su propio contenido (web y Email Routing), que sí queda dentro del radio.
+
+**Condición de revisión.** Si Cloudflare avisa o limita, o si el tráfico remoto crece (más de
+un par de horas diarias de vídeo), mover la zona a una **cuenta de Cloudflare propia**, que es
+gratuita, o pasar a WireGuard (opción C).
+
+**Controles obligatorios antes de activar el perfil `tunel`** (verificación en Gate 3):
+1. Túnel propio `bragi-tunel`, token solo en `deploy/.env`.
+2. `network.xml`: `KnownProxies` = IP fija del túnel; `LocalNetworkSubnets` = solo la LAN.
+3. Admin con `EnableRemoteAccess=false`.
+4. Regla de límite de tasa en la zona sobre `/Users/AuthenticateByName`.
+5. `LoginAttemptsBeforeLockout` en todas las cuentas.
+
 ## Consecuencias
-- Pendiente de la decisión. Hasta entonces Bragi funciona solo en la LAN y Gate 1 queda abierto.
+- Positivas: los clientes nativos de TV y móvil funcionan fuera de casa sin VPN; una suspensión
+  probable no toca `higerotech.com`.
+- Negativas: el login de Jellyfin queda expuesto a internet (T1, mitigado por los controles 3–5);
+  el riesgo T9 baja de "atender ya" a "monitorear", pero no desaparece mientras compartan cuenta.
