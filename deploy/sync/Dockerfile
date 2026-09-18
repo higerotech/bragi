@@ -15,4 +15,7 @@ COPY --chmod=0755 sync.sh config.sh /usr/local/bin/
 COPY --chmod=0644 network.xml.tmpl /usr/local/share/bragi/network.xml.tmpl
 
 ENV HOME=/tmp
+# Sin root por defecto (Trivy DS-0002). El compose fija el usuario real de cada tarea: sync corre
+# como el dueño del clon y config como el de Jellyfin.
+USER 65534:65534
 ENTRYPOINT ["/usr/local/bin/sync.sh"]
