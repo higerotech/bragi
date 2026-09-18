@@ -9,6 +9,27 @@ El cierre de cada gate AI-DLC corta versión (Gate 0 → 0.1.0, Gate 1 → 0.2.0
 
 ## [Unreleased]
 
+### Añadido
+- **`network.xml` de Jellyfin como código** (ADR-0006): plantilla horneada en `bragi-sync` y tarea
+  `config` de un solo uso que la escribe en cada despliegue, como el usuario de Jellyfin y sin red.
+  Valida `LAN_SUBNET` y `TUNEL_IP` antes de escribir. Jellyfin se recrea en cada despliegue
+  (`BRAGI_REV`) porque solo lee `network.xml` al arrancar.
+- `deploy/scripts/politicas.sh`: aplica y verifica por la API las políticas de cuenta (admin sin
+  acceso remoto, bloqueo a 5 intentos, límite de sesiones, sin límite de bitrate remoto).
+- `deploy/tests/prueba-proxy.sh`: prueba de integración de la frontera de confianza contra un
+  Jellyfin 10.11.11 real, atacada desde la LAN, desde el proxy de confianza y desde otro
+  contenedor. Incluye el `X-Forwarded-For` falsificado a través de Cloudflare (P5).
+- Workflow `build` (publica `bragi-sync` para el receptor) y workflow `ci` (compose, RS01, RS06,
+  shellcheck, casos inválidos de `config.sh`, integración, gitleaks, Trivy).
+- `LAN_SUBNET` en `.env.example`.
+
+### Seguridad
+- **H1: el bloqueo por intentos de Jellyfin 10.11.11 no bloquea** (jellyfin#17278, arreglado en
+  12.0). Frente a la fuerza bruta (T1) quedan el límite de tasa de Cloudflare y la longitud de la
+  clave. P9 queda como fallo conocido hasta la decisión HITL sobre la versión.
+- **H2: `MaxActiveSessions` limita dispositivos con sesión, no reproducciones.** RNF04 queda
+  pendiente de revisión HITL. `BRAGI_SESIONES_MAX` permite ajustar el límite sin tocar el script.
+
 ## [0.2.0] - 2026-09-17
 
 **Gate 1 (Design) aprobado.**

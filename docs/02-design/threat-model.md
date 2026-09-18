@@ -4,7 +4,7 @@
 * **Fecha:** 2026-09-17
 * **Decisores:** Jeremi
 * **Fase AI-DLC:** 02-design
-* **Versión:** 0.2.0
+* **Versión:** 0.3.0-dev
 * **Alcance:** Jellyfin, túnel, tarea sync, montaje NFS y datos en midgard
 * **Metodología:** STRIDE por elemento del DFD + DREAD para priorizar
 
@@ -32,7 +32,7 @@ midgard; TB3 = red Docker; TB4 = midgard↔NAS.*
 ## STRIDE
 | ID | Elemento | STRIDE | Amenaza | Control | Traza |
 |---|---|---|---|---|---|
-| T1 | Flujo 1/3 | S | Fuerza bruta de contraseñas por el túnel | Límite de tasa CF + bloqueo por intentos + contraseñas ≥ 12 | RS03, RS09 |
+| T1 | Flujo 1/3 | S | Fuerza bruta de contraseñas por el túnel | Límite de tasa CF + contraseñas ≥ 12. El bloqueo por intentos **no funciona en 10.11.11** (H1) | RS03, RS09 |
 | T2 | Flujo 3 | S, E | `X-Forwarded-For` falso para parecer LAN y usar el admin | KnownProxies = solo IP del túnel; la red Docker fuera de `LocalNetworkSubnets` | RS04, ADR-0004 |
 | T3 | Jellyfin | E | Familiar intenta funciones de admin | Cuentas sin privilegios; admin sin acceso remoto | RS02 |
 | T4 | Jellyfin | D | Transcodes que ahogan al router | `cpus 3.0`, `cpu_shares 512`, 2 sesiones por cuenta | RNF01, RNF04, ADR-0002 |
@@ -67,12 +67,26 @@ quadrantChart
 *Eje trazabilidad · DREAD residual · Gate 1. Con la zona aparte, T9 baja de impacto: una
 limitación ya no alcanza la landing ni el despliegue continuo.*
 
+## Hallazgos de implementación (Gate 2)
+Salen de `deploy/tests/prueba-proxy.sh`, que ataca la frontera con un Jellyfin 10.11.11 real.
+
+| ID | Hallazgo | Impacto | Estado |
+|---|---|---|---|
+| H1 | **El bloqueo por intentos no bloquea.** Jellyfin registra `Disabling user ... due to 5 unsuccessful login attempts`, pero no guarda `IsDisabled` y la clave buena sigue entrando. Es [jellyfin#17278](https://github.com/jellyfin/jellyfin/issues/17278), arreglado en 12.0 por el PR #17274 y sin backport a 10.11 | RS03 queda sin su segundo control: frente a T1 solo quedan el límite de tasa de Cloudflare y la longitud de la clave | **HITL**: subir de versión o aceptar. P9 queda como fallo conocido |
+| H2 | **`MaxActiveSessions` cuenta sesiones abiertas, no reproducciones.** Con 2, el tercer dispositivo con la sesión iniciada recibe 403 al entrar | RNF04 tal como está escrito no se puede implementar así, y con 2 una persona con TV, móvil y tablet se queda fuera | **HITL**: revisar RNF04 |
+| H3 | Con `X-Forwarded-For: <IP LAN>, <IP pública>` llegando del proxy, Jellyfin usa la de la derecha | Confirma que el XFF falsificado a través de Cloudflare no salta RS02 (P5) | Resuelto, con prueba |
+
+Estado de la versión (consultado el 2026-09-17): 12.0 arregla H1, pero `/UserViews` agota la
+memoria en bibliotecas grandes ([#17871](https://github.com/jellyfin/jellyfin/issues/17871),
+arreglado en 12.1). 12.1 tiene abierto un informe de corrupción de `jellyfin.db`
+([#18100](https://github.com/jellyfin/jellyfin/issues/18100)), delicado en un equipo sin UPS.
+
 ## Verificación prevista (Gate 3)
 | Amenaza | Prueba |
 |---|---|
-| T2 | Desde fuera, `curl -H 'X-Forwarded-For: <IP LAN>'` contra el login admin → 401 |
+| T2 | Cubierto en CI por P2–P6. En el appliance: desde datos móviles, admin → 403 |
 | T3 | Cuenta familiar contra `/System/Configuration` → 403 |
 | T4 | `probar-limites.sh` con transcode + Heimdall sin alertas |
 | T5 | `docker inspect bragi`: `User` ≠ 0, `CapDrop=[ALL]`; `touch /media/x` → solo lectura |
 | T7 | Montar el export desde un equipo LAN que no sea el appliance → `access denied` (hecho el 2026-09-17) |
-| T1 | 10 intentos fallidos → bloqueo de la cuenta y 429 de Cloudflare |
+| T1 | Ráfaga contra el login → 429 de Cloudflare. El bloqueo de cuenta depende de H1 |
