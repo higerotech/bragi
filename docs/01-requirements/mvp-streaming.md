@@ -63,7 +63,7 @@ transcode, HEVC por hardware, DLNA, plugins de terceros y Live TV.
 | AB04 | Un usuario remoto con límite de bitrate fuerza transcodes y se come la CPU del router | Tope RNF01, bitrate remoto sin límite bajo, RNF04 |
 | AB05 | Una vulnerabilidad de Jellyfin da ejecución en el contenedor e intenta tocar la biblioteca o el host | RS05, RS08, red propia |
 | AB06 | Tráfico de vídeo por el CDN gratuito de Cloudflare dispara la suspensión por sus términos | Decisión HITL en ADR-0004 |
-| AB07 | Un equipo cualquiera de la LAN monta el export NFS de la biblioteca | Fuera de Bragi: restringir el export en el NAS (T7) |
+| AB07 | Un equipo cualquiera de la LAN monta el export NFS de la biblioteca | Export restringido a la IP del appliance en el NAS (T7) |
 
 ## Contexto
 

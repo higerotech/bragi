@@ -8,7 +8,9 @@
 - [x] ADRs 0001, 0003, 0005 aceptadas
 - [x] **HITL: ADR-0004** — opción A aceptada el 2026-09-17: túnel en una zona propia de
       Jeremi, distinta de `higerotech.com`. Riesgo residual: misma cuenta de Cloudflare.
-- [ ] **HITL: T7** — restringir el export NFS del NAS a la IP del appliance (acción fuera de Bragi).
+- [x] **HITL: T7** — export `media` del NAS restringido a la IP del appliance el 2026-09-17
+      (panel del NAS). Verificado: montaje nuevo desde el appliance OK; desde otro equipo de
+      la LAN, `access denied by server`.
 - [x] Contratos: no aplica (Bragi no publica API propia; la de Jellyfin es upstream).
 
 Evidencia: C4 + sequence + state + DFD + quadrant.

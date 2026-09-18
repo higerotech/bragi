@@ -38,7 +38,7 @@ midgard; TB3 = red Docker; TB4 = midgard↔NAS.*
 | T4 | Jellyfin | D | Transcodes que ahogan al router | `cpus 3.0`, `cpu_shares 512`, 2 sesiones por cuenta | RNF01, RNF04, ADR-0002 |
 | T5 | Jellyfin | E, T | RCE en Jellyfin toca biblioteca o host | Sin root, `cap_drop ALL`, `no-new-privileges`, biblioteca `ro` | RS05, RS08 |
 | T6 | Imágenes | T | Imagen alterada o `latest` que cambia solo | Digest pineado; sync sobre Alpine pineado | RS06, ADR-0001 |
-| T7 | Flujo 6 | I, T | El NAS exporta a `*`: cualquier equipo LAN monta la biblioteca | **Fuera de Bragi**: restringir el export a la IP del appliance | AB07 |
+| T7 | Flujo 6 | I, T | El NAS exportaba a `*`: cualquier equipo LAN montaba la biblioteca | Export restringido a la IP del appliance (2026-09-17, verificado); `verificar-media.sh` avisa si vuelve a `*` | AB07 |
 | T8 | Flujo 5 | I | Credenciales en HTTP dentro de la LAN | Aceptado (LAN de confianza, como Odín); revisable si se añade TLS local | data-classification |
 | T9 | Flujo 1 | D | Cloudflare limita la zona por servir vídeo | Zona aparte de `higerotech.com` (ADR-0004); residual: misma cuenta | AB06 |
 | T10 | DB | D | Apagón corrompe SQLite (sin UPS) | Respaldo de `/var/lib/bragi/config` antes de upgrades y periódico (Gate 4) | ADR-0001 |
@@ -60,7 +60,7 @@ quadrantChart
     T2 XFF falso: [0.15, 0.8]
     T4 CPU del router: [0.3, 0.6]
     T5 RCE: [0.15, 0.6]
-    T7 export NFS abierto: [0.3, 0.5]
+    T7 export NFS: [0.1, 0.5]
     T9 suspension CF: [0.5, 0.4]
     T10 SQLite y apagon: [0.5, 0.4]
 ```
@@ -74,4 +74,5 @@ limitación ya no alcanza la landing ni el despliegue continuo.*
 | T3 | Cuenta familiar contra `/System/Configuration` → 403 |
 | T4 | `probar-limites.sh` con transcode + Heimdall sin alertas |
 | T5 | `docker inspect bragi`: `User` ≠ 0, `CapDrop=[ALL]`; `touch /media/x` → solo lectura |
+| T7 | Montar el export desde un equipo LAN que no sea el appliance → `access denied` (hecho el 2026-09-17) |
 | T1 | 10 intentos fallidos → bloqueo de la cuenta y 429 de Cloudflare |
