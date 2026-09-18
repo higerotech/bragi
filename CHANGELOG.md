@@ -10,6 +10,23 @@ El cierre de cada gate AI-DLC corta versión (Gate 0 → 0.1.0, Gate 1 → 0.2.0
 ## [Unreleased]
 
 ### Añadido
+- `deploy/tests/docker-compose.staging.yml`: el compose de producción levantado en el appliance
+  junto al despliegue actual (puerto 18096, base propia), sin receptor ni GHCR.
+- `deploy/tests/prueba-appliance.sh`: verificador en el appliance (RS01, RS05, RS06, RS08, topes,
+  `rslave`, `network.xml`, frontera de confianza en la red real y deriva de políticas). Se
+  reutiliza en el Gate 4 contra producción.
+- `docs/04-testing/test-plan.md` con los resultados del staging del 2026-09-17.
+
+### Seguridad
+- Verificado en la red real que Docker conserva la IP del cliente LAN en el puerto publicado (F3)
+  y que un contenedor de `docker0` cuenta como remoto (F2).
+
+### Pendiente
+- **H5: el transcode con `cpus: 3.0` dio 0,78x** en el appliance, con el Jellyfin manual en pleno
+  escaneo de la biblioteca. Falta la medida sin contención para decidir el tope.
+- **H4:** arranque tras apagón sin probar; pasa al Gate 4.
+
+### Añadido
 - **`network.xml` de Jellyfin como código** (ADR-0006): plantilla horneada en `bragi-sync` y tarea
   `config` de un solo uso que la escribe en cada despliegue, como el usuario de Jellyfin y sin red.
   Valida `LAN_SUBNET` y `TUNEL_IP` antes de escribir. Jellyfin se recrea en cada despliegue
