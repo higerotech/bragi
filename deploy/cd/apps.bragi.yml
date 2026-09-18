@@ -1,0 +1,16 @@
+  # --- Bragi (Jellyfin) --- lo anade deploy/cd/bootstrap-midgard.sh bajo `apps:`
+  - name: bragi
+    repo: higerotech/bragi
+    branch: main
+    event: workflow_run
+    workflow: build
+    project_dir: /srv/apps/bragi
+    compose_file: deploy/docker-compose.yml
+    image: ghcr.io/higerotech/bragi-sync
+    tag_template: "sha-{short_sha}"
+    services: []
+    health_url: http://192.0.2.1:8096/health   # bootstrap sustituye por la IP LAN real
+    health_timeout: 300   # primer arranque sobre el HDD de 5400 rpm
+    health_interval: 5
+    rollback: true
+    command_timeout: 900

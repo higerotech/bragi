@@ -1,0 +1,20 @@
+[Unit]
+Description=Bragi: converge el servidor de medios tras el arranque del appliance
+Documentation=https://github.com/higerotech/bragi/blob/main/docs/05-deployment/deployment.md
+Requires=docker.service
+After=docker.service network-online.target remote-fs.target
+Wants=network-online.target
+# Reintentos: el NAS puede tardar mas que midgard en volver tras un apagon.
+StartLimitIntervalSec=2h
+StartLimitBurst=20
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/local/sbin/bragi-arranque.sh
+Restart=on-failure
+RestartSec=60
+TimeoutStartSec=900
+
+[Install]
+WantedBy=multi-user.target

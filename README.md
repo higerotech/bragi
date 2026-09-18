@@ -41,6 +41,8 @@ deploy/
     politicas.sh        # aplica y verifica las politicas de cuenta por la API
   tests/
     prueba-proxy.sh     # integracion: ataca la frontera de confianza con Jellyfin real
+    prueba-appliance.sh # verificacion en el appliance (staging o produccion)
+  cd/                   # bootstrap, migracion y unidad de arranque (Gate 4)
 docs/
   00-project/           # charter, glosario, clasificación, ADRs
   01-requirements/      # PRD con abuso, ASVS y threat assessment
@@ -51,7 +53,7 @@ docs/
 ## Despliegue
 Lo despliega el receptor de
 [despliegue-continuo](https://github.com/higerotech/despliegue-continuo) al fusionar en
-`main` (ADR-0003). El bootstrap del servidor está previsto para Gate 4.
+`main` (ADR-0003). Runbook completo en `docs/05-deployment/deployment.md`.
 
 ## Anonimización
 Repositorio público. No contiene IPs, MACs, hostnames ni credenciales reales: los ejemplos usan
