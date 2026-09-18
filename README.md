@@ -9,12 +9,12 @@ repo hermano de [Yggdrasil](https://github.com/higerotech/yggdrasil) (monitor de
 de [Fenrir](https://github.com/higerotech/fenrir) (NVR), y sigue su convención de nombres.
 
 ## Estado
-Gate 0 y Gate 1 en revisión. El acceso externo (ADR-0004) espera decisión.
+Gate 0 y Gate 1 en revisión. Acceso externo decidido: túnel en una zona aparte (ADR-0004).
 
 | Gate | Estado |
 |---|---|
 | 0 Requirements | Artefactos listos; falta HITL |
-| 1 Design | Bloqueado por ADR-0004 (túnel y términos de Cloudflare) |
+| 1 Design | Falta restringir el export NFS del NAS (T7) |
 | 2–5 | Pendientes |
 
 ## Números que mandan el diseño
