@@ -17,6 +17,9 @@
 set -uo pipefail
 
 DUR="${1:-60}"
+# Preset de x264: veryfast es el que usa Jellyfin por defecto ("auto"). superfast y ultrafast
+# cambian calidad por velocidad; sirven para decidir el ajuste "Encoding preset" del servidor.
+PRESET="${BRAGI_PRESET:-veryfast}"
 C="${BRAGI_CONTENEDOR:-bragi}"
 FF=/usr/lib/jellyfin-ffmpeg/ffmpeg
 
@@ -52,11 +55,11 @@ echo "== Carga del host ANTES =="
 uptime | sed 's/^/  /'
 
 echo
-echo "== Transcode HEVC 10bit -> H.264 1080p, ${DUR}s de video, dentro del contenedor =="
+echo "== Transcode HEVC 10bit -> H.264 1080p, preset $PRESET, ${DUR}s de video, dentro del contenedor =="
 # ffmpeg emite la linea con speed= al terminar, pero DESPUES imprime los resumenes de
 # cada codec. Hay que filtrar por speed=, no quedarse con las ultimas lineas.
 salida=$(docker exec "$C" "$FF" -hide_banner -nostats -t "$DUR" -i "$rel" \
-    -c:v libx264 -preset veryfast -crf 23 -c:a aac -f null - 2>&1)
+    -c:v libx264 -preset "$PRESET" -crf 23 -c:a aac -f null - 2>&1)
 echo "$salida" | grep -E 'speed=|frame=' | tail -1 | sed 's/^/  /'
 speed=$(echo "$salida" | grep -oE 'speed=[0-9.]+x' | tail -1 | sed 's/speed=//; s/x$//')
 

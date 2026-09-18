@@ -63,7 +63,8 @@ C4Container
 | F2 | Admin desde un contenedor en `docker0` | RS02, RS04 | ✅ 403 |
 | **F3** | **Admin desde un PC real de la LAN** | RS02 | ✅ 200: Docker conserva la IP del cliente en el puerto publicado. Con la IP del gateway habría sido 403 |
 | P1 | `politicas.sh --verificar` sin deriva | RS02, RS03 | ✅ |
-| C1 | Transcode HEVC 10 bit → H.264 1080p con `cpus: 3.0` | RF03 | ❌ **0,78x** (ver H5) |
+| C1 | Transcode HEVC 10 bit → H.264 1080p con `cpus: 3.0`, con el escaneo de producción en marcha | RF03 | ❌ 0,78x |
+| C1b | Ídem **sin contención** (Jellyfin de producción pausado 82 s con autorización de Jeremi, sin clientes conectados) | RF03 | ❌ **0,92x** |
 | C2 | Heimdall durante el transcode | RNF02 | ✅ 0 alertas; todas las sondas en 1 |
 
 ## Hallazgos del Gate 3
@@ -71,7 +72,7 @@ C4Container
 | ID | Hallazgo | Estado |
 |---|---|---|
 | H4 | **No probado aún: arranque tras un apagón.** Yggdrasil descubrió (su TA-13) que Docker no reaplica `restart: unless-stopped` a un contenedor que falla durante la restauración tras un apagado sucio. Bragi tiene un motivo extra para fallar ahí: si el automount NFS no está listo, runc no puede hacer el bind de `/media` y el contenedor no arranca | Gate 4: unidad de arranque equivalente a `yggdrasil-arranque.service` y prueba de reinicio con HITL |
-| H5 | **RF03 falla bajo contención: 0,78x.** Durante la prueba, el Jellyfin manual de producción estaba en su primer escaneo (≈28 % de CPU sostenida, 16 % de iowait) y un contenedor de otro stack tuvo un pico del 95 %. La carga del host era 2,6 **antes** de empezar. La estimación de diseño (~1,25x) salía de una medida sin contención | **Abierto.** Repetir con el host sin el escaneo (pausar producción, o esperar a que termine) para separar el tope de la contención |
+| H5 | **RF03 falla bajo contención: 0,78x.** Durante la prueba, el Jellyfin manual de producción estaba en su primer escaneo (≈28 % de CPU sostenida, 16 % de iowait) y un contenedor de otro stack tuvo un pico del 95 %. La carga del host era 2,6 **antes** de empezar. La estimación de diseño (~1,25x) salía de una medida sin contención | **Medida limpia hecha (C1b): 0,92x.** El tope de 3.0 no sostiene un transcode HEVC 10 bit a 1080p ni con el host libre. La estimación de ~1,25x extrapolaba linealmente una medida sin tope que, al parecer, se hizo con otro fichero. Decisión de diseño pendiente (HITL) |
 
 **Lectura de H5 para el diseño, sea cual sea la repetición:** mientras Jellyfin escanea, un
 transcode no llega a tiempo real con el tope actual. El escaneo inicial es puntual, pero los
@@ -80,5 +81,6 @@ nuevo. Es un motivo más para empujar a la reproducción directa (ADR-0002), y e
 debía: el router no se enteró (C2).
 
 ## Pendiente para cerrar el Gate 3
-- [ ] Repetir C1 sin contención (H5) y decidir, con el dato limpio, si el tope de 3.0 se mantiene.
+- [x] Repetir C1 sin contención (H5): 0,92x.
+- [ ] **HITL:** decidir con ese dato cómo se cumple RF03 (o si se revisa).
 - [ ] Ejecutar el CI sobre esta rama.

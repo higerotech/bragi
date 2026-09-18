@@ -9,17 +9,6 @@ El cierre de cada gate AI-DLC corta versión (Gate 0 → 0.1.0, Gate 1 → 0.2.0
 
 ## [Unreleased]
 
-## [0.3.0] - 2026-09-17
-
-**Gate 2 (Implementation) aprobado.**
-
-### Cambiado
-- **RNF04 revisado (HITL, hallazgo H2):** sin límite de sesiones por cuenta. `MaxActiveSessions`
-  cuenta dispositivos con sesión, no reproducciones, y los topes de CPU ya protegen el router.
-  `politicas.sh` aplica `0` por defecto. PRD pasa a 0.1.1.
-- **Versión de Jellyfin (HITL, hallazgo H1):** se mantiene la 10.11.11 mientras Bragi sea solo LAN;
-  la versión se decide antes de activar el túnel (Gate 4). Anotado en ADR-0001 y en el Gate 4.
-
 ### Añadido
 - `deploy/tests/docker-compose.staging.yml`: el compose de producción levantado en el appliance
   junto al despliegue actual (puerto 18096, base propia), sin receptor ni GHCR.
@@ -33,9 +22,21 @@ El cierre de cada gate AI-DLC corta versión (Gate 0 → 0.1.0, Gate 1 → 0.2.0
   y que un contenedor de `docker0` cuenta como remoto (F2).
 
 ### Pendiente
-- **H5: el transcode con `cpus: 3.0` dio 0,78x** en el appliance, con el Jellyfin manual en pleno
-  escaneo de la biblioteca. Falta la medida sin contención para decidir el tope.
+- **H5: el transcode con `cpus: 3.0` no llega a tiempo real en el appliance:** 0,78x con el
+  Jellyfin manual escaneando y **0,92x sin contención** (producción pausada 82 s con autorización).
+  RF03 queda pendiente de decisión.
 - **H4:** arranque tras apagón sin probar; pasa al Gate 4.
+
+## [0.3.0] - 2026-09-17
+
+**Gate 2 (Implementation) aprobado.**
+
+### Cambiado
+- **RNF04 revisado (HITL, hallazgo H2):** sin límite de sesiones por cuenta. `MaxActiveSessions`
+  cuenta dispositivos con sesión, no reproducciones, y los topes de CPU ya protegen el router.
+  `politicas.sh` aplica `0` por defecto. PRD pasa a 0.1.1.
+- **Versión de Jellyfin (HITL, hallazgo H1):** se mantiene la 10.11.11 mientras Bragi sea solo LAN;
+  la versión se decide antes de activar el túnel (Gate 4). Anotado en ADR-0001 y en el Gate 4.
 
 ### Añadido
 - `docs/03-implementation/repo-history.md`, derivado del historial real de `develop`.
