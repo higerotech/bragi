@@ -33,7 +33,16 @@ Runbook: `docs/05-deployment/deployment.md` (C4 Deployment, pipeline con rollbac
 - [ ] Respaldo de `/var/lib/bragi/config` (T10), sobre todo antes de cualquier subida de versión
 
 ## Antes de activar el perfil `tunel`
-- [ ] **HITL:** versión de Jellyfin (H1, ADR-0001): 10.11.11 o 12.x según el estado de #18100
-- [ ] Túnel creado en la zona aparte y `TUNNEL_TOKEN` en `deploy/.env`
-- [ ] Los cinco controles de ADR-0004 verificados en el appliance, incluida la regla de límite de
-      tasa sobre el login
+- [x] **HITL:** versión de Jellyfin (H1): **se mantiene 10.11.11** (2026-09-18). #18100 de la 12.1
+      seguía abierto y sin triaje; el bloqueo por intentos roto se compensa con el límite de tasa
+- [x] Túnel en la zona aparte, hostname público → `http://bragi:8096`, token en `deploy/.env`
+      (0600). El primer token se **rotó** tras quedar expuesto en la sesión de trabajo al
+      diagnosticar el `.env`; ver lección en el CHANGELOG
+- [x] Controles de ADR-0004 verificados desde internet (2026-09-18):
+  1. túnel propio `bragi-tunel`, 4 conexiones registradas;
+  2. Jellyfin ve la IP pública real del cliente (ni la del túnel ni la de la LAN);
+  3. admin sin acceso remoto (F2 403, y P4/P5 en CI);
+  4. límite de tasa sobre el login: 15 intentos en paralelo → 1×429, la ráfaga siguiente 15×429,
+     el resto de rutas sigue en 200 y se levanta a los 10 s. **Es aproximado:** la primera ráfaga
+     casi entera pasa antes de que salte;
+  5. bloqueo por intentos: **no funciona en 10.11.11** (H1), aceptado con el control 4
