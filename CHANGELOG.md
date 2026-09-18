@@ -13,11 +13,21 @@ El cierre de cada gate AI-DLC corta versión (Gate 0 → 0.1.0, Gate 1 → 0.2.0
 - **Respaldo nocturno de la configuración** (ADR-0008) al share `respaldos` del NAS: copia en
   caliente de la base con `integrity_check`, 23 MB, 14 días, a las 05:30 de la casa y con
   `Persistent=true` frente a apagones. Simulacro de restauración superado.
+- **Acceso externo por el túnel activo** (2026-09-18) en la zona aparte de ADR-0004, con los
+  controles verificados desde internet: IP real del cliente en Jellyfin, admin bloqueado desde
+  fuera y límite de tasa de Cloudflare sobre el login (429). Se mantiene Jellyfin 10.11.11 (H1).
 - Políticas aplicadas en producción y verificación completa en verde con la cuenta real del
   operador (admin bloqueado desde fuera de la LAN: 403).
 - **Bragi en producción desde el 2026-09-18 03:36 UTC**, desplegado por el receptor
   (`sha-b1dd0f2`). Corte desde el Jellyfin manual en 5 min 33 s, conservando base, usuarios e
   identidad del servidor.
+
+### Seguridad
+- **Token del túnel rotado.** El primero quedó expuesto en la sesión de trabajo al diagnosticar el
+  `.env` con un comando que imprimía líneas; además se había guardado corrupto (una `n` en lugar
+  de salto de línea, porque la shell se comió la barra invertida de `printf`). Regla desde
+  entonces: sobre ficheros con secretos, solo recuentos, longitudes y hashes; y guardar secretos con
+  `echo`, sin barras invertidas.
 
 ### Corregido
 - **`bootstrap-midgard.sh` tomaba la zona horaria del host**, que en el appliance es UTC. La

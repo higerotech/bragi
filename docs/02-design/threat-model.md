@@ -32,7 +32,7 @@ midgard; TB3 = red Docker; TB4 = midgard↔NAS.*
 ## STRIDE
 | ID | Elemento | STRIDE | Amenaza | Control | Traza |
 |---|---|---|---|---|---|
-| T1 | Flujo 1/3 | S | Fuerza bruta de contraseñas por el túnel | Límite de tasa CF + contraseñas ≥ 12. El bloqueo por intentos **no funciona en 10.11.11** (H1) | RS03, RS09 |
+| T1 | Flujo 1/3 | S | Fuerza bruta de contraseñas por el túnel | Límite de tasa CF **verificado** (429 tras la primera ráfaga) + contraseñas ≥ 12. El bloqueo por intentos **no funciona en 10.11.11** (H1) | RS03, RS09 |
 | T2 | Flujo 3 | S, E | `X-Forwarded-For` falso para parecer LAN y usar el admin | KnownProxies = solo IP del túnel; la red Docker fuera de `LocalNetworkSubnets` | RS04, ADR-0004 |
 | T3 | Jellyfin | E | Familiar intenta funciones de admin | Cuentas sin privilegios; admin sin acceso remoto | RS02 |
 | T4 | Jellyfin | D | Transcodes que ahogan al router | `cpus 3.0`, `cpu_shares 512`, sin límite de bitrate remoto, preset `superfast`, tareas pesadas de madrugada. Verificado: 0 alertas de Heimdall en 4 transcodes | RNF01, RNF04, ADR-0002 |
@@ -43,7 +43,7 @@ midgard; TB3 = red Docker; TB4 = midgard↔NAS.*
 | T9 | Flujo 1 | D | Cloudflare limita la zona por servir vídeo | Zona aparte de `higerotech.com` (ADR-0004); residual: misma cuenta | AB06 |
 | T10 | DB | D | Apagón corrompe SQLite (sin UPS) | Respaldo nocturno verificado (`integrity_check` + sha256) con restauración probada | ADR-0001, ADR-0008 |
 | T11 | Flujo 7/8 | T | Un commit malicioso en `main` se despliega solo | Ruleset Protect-MAIN (PR obligatorio); sync solo hace checkout, no ejecuta | ADR-0003 |
-| T12 | `.env` | I | `TUNNEL_TOKEN` filtrado permite suplantar el túnel | `.env` 0600, fuera del repo; rotación en el panel de CF | RS07 |
+| T12 | `.env` | I | `TUNNEL_TOKEN` filtrado permite suplantar el túnel | `.env` 0600, fuera del repo; rotación en el panel de CF. **Ocurrió** el 2026-09-18 al diagnosticar el `.env` y se rotó: sobre ficheros con secretos, solo recuentos y longitudes | RS07 |
 
 ## DREAD
 
