@@ -9,6 +9,21 @@ El cierre de cada gate AI-DLC corta versión (Gate 0 → 0.1.0, Gate 1 → 0.2.0
 
 ## [Unreleased]
 
+### Añadido
+- Runbook del Gate 4 (`docs/05-deployment/deployment.md`) con C4 Deployment, pipeline con rollback
+  y gantt del corte.
+- `deploy/cd/bootstrap-midgard.sh`: prepara el appliance (usuario, datos, clon, `.env`,
+  inventario del receptor, unidad de arranque). Idempotente y sin secretos.
+- `deploy/cd/migrar-desde-manual.sh`: ventana de corte desde el Jellyfin manual; no borra el origen.
+- `deploy/cd/bragi-arranque.{sh,service}` (H4): tras un apagón espera al NFS y converge Jellyfin
+  (y el túnel si está activo) sin depender de `restart: unless-stopped`.
+- `deploy/cd/apps.bragi.yml`: entrada del receptor.
+- CI: shellcheck de `deploy/cd` y `systemd-analyze verify` de la unidad.
+
+### Seguridad
+- **ADR-0007: Jellyfin corre con un usuario de sistema propio (`bragi`)** y no con el uid del
+  operador, que tiene `sudo` sin contraseña.
+
 ## [0.4.0] - 2026-09-18
 
 **Gate 3 (Testing) aprobado.**

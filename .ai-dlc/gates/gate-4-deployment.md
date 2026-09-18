@@ -1,16 +1,28 @@
 # Gate 4 — Deployment
 
-Pendiente. Se abre al cerrar el gate anterior.
+Runbook: `docs/05-deployment/deployment.md` (C4 Deployment, pipeline con rollback y gantt del corte).
 
-Previsto: runbook de bootstrap (clon, `.env`, `/var/lib/bragi`, migración desde `~/jellyfin`,
-entrada en `apps.yml`) y respaldo de la config. El asistente inicial ya se completó en midgard.
+## Artefactos
+- [x] `deploy/cd/bootstrap-midgard.sh`: usuario `bragi` (ADR-0007), `/var/lib/bragi`, clon,
+      `.env` con la LAN real, entrada en `apps.yml` y unidad de arranque. Idempotente
+- [x] `deploy/cd/migrar-desde-manual.sh`: ventana de corte; no borra el origen
+- [x] **H4:** `bragi-arranque.service` espera al NFS (con `findmnt`, porque el autofs engaña a
+      `mountpoint`) y converge solo los servicios de larga duración; reintenta si el NAS tarda
+- [x] Rollback de la migración documentado
 
-- [ ] **H4:** unidad de arranque (patrón `yggdrasil-arranque.service`) que asegure que Bragi
-      vuelve tras un apagón aunque el automount NFS no esté listo, y prueba de reinicio con HITL.
-- [ ] `politicas.sh --aplicar` contra producción (API key de Jeremi) y `prueba-appliance.sh` limpio.
-- [ ] Desmontar el staging del Gate 3 (`~/bragi-staging`): usa los nombres `bragi-sync`,
-      `bragi-config` y la red `bragi` de producción.
+## Ejecución en el appliance
+- [ ] Release a `main` y build de `bragi-sync`
+- [ ] **[Jeremi]** Paquete GHCR `bragi-sync` público
+- [ ] Desmontar el staging del Gate 3 (`~/bragi-staging`), que usa los nombres de producción
+- [ ] `bootstrap-midgard.sh`
+- [ ] **[Jeremi]** Webhook `workflow_run` en el repo
+- [ ] Ventana de corte (autorizada por Jeremi) y primer despliegue por el receptor
+- [ ] `politicas.sh --aplicar` contra producción (API key de Jeremi) y `prueba-appliance.sh` limpio
+- [ ] **[Jeremi] H4:** prueba de reinicio con Bragi volviendo solo
+- [ ] Respaldo de `/var/lib/bragi/config` (T10), sobre todo antes de cualquier subida de versión
 
-**Antes de activar el perfil `tunel`:**
-- [ ] **HITL:** versión de Jellyfin (H1, ADR-0001): 10.11.11 o 12.x según el estado de #18100.
-- [ ] Los cinco controles de ADR-0004 verificados en el appliance.
+## Antes de activar el perfil `tunel`
+- [ ] **HITL:** versión de Jellyfin (H1, ADR-0001): 10.11.11 o 12.x según el estado de #18100
+- [ ] Túnel creado en la zona aparte y `TUNNEL_TOKEN` en `deploy/.env`
+- [ ] Los cinco controles de ADR-0004 verificados en el appliance, incluida la regla de límite de
+      tasa sobre el login
