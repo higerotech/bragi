@@ -12,6 +12,10 @@
 #                    (AB04)
 #   Todas            con contrasena (RS09; la longitud no es visible por la API)
 #   Servidor         RemoteClientBitrateLimit=0 (AB04)
+#   Transcodificacion EncoderPreset=superfast: con el tope de 3 CPU, veryfast da 0,92x en un
+#                    HEVC 10 bit y superfast 1,13x (RF03, Gate 3)
+#   Tareas pesadas   escaneo, personas, capitulos y miniaturas solo entre la 01:00 y las 06:00
+#                    (hora del contenedor): con un escaneo en marcha un transcode no llega a 1x
 #
 # Uso (desde la LAN: con el admin sin acceso remoto, desde fuera no funcionaria):
 #   JELLYFIN_URL=http://192.0.2.1:8096 JELLYFIN_TOKEN=<api key> ./politicas.sh            verifica
@@ -99,5 +103,52 @@ else
     echo "  DERIVA  servidor: RemoteClientBitrateLimit=$limite (fuerza transcodes remotos)"
     deriva=1
 fi
+
+PRESET=superfast
+enc="$(api GET /System/Configuration/encoding)" || { echo "No pude leer la configuracion de codificacion"; exit 2; }
+preset="$(jq -r '.EncoderPreset // "auto"' <<<"$enc")"
+if [ "$preset" = "$PRESET" ]; then
+    echo "  ok      transcodificacion: EncoderPreset=$preset"
+elif [ "$aplicar" = 1 ]; then
+    if api POST /System/Configuration/encoding "$(jq -c --arg p "$PRESET" '.EncoderPreset = $p' <<<"$enc")" >/dev/null; then
+        echo "  aplico  transcodificacion: EncoderPreset $preset -> $PRESET"
+    else
+        echo "  FALLO   transcodificacion: no pude poner EncoderPreset=$PRESET"; deriva=1
+    fi
+else
+    echo "  DERIVA  transcodificacion: EncoderPreset=$preset (con el tope de CPU, solo $PRESET llega a 1x)"
+    deriva=1
+fi
+
+# Tareas pesadas: cada disparador debe ser diario o semanal y caer en la ventana de madrugada.
+# Un IntervalTrigger (el escaneo viene "cada 12 h" de fabrica) cae a cualquier hora.
+HORA=36000000000   # ticks de .NET en una hora (100 ns)
+declare -A VENTANA=(
+    [RefreshLibrary]='[{"Type":"DailyTrigger","TimeOfDayTicks":144000000000}]'
+    [RefreshPeople]='[{"Type":"WeeklyTrigger","DayOfWeek":"Sunday","TimeOfDayTicks":180000000000}]'
+    [RefreshChapterImages]='[{"Type":"DailyTrigger","TimeOfDayTicks":72000000000,"MaxRuntimeTicks":144000000000}]'
+    [RefreshTrickplayImages]='[{"Type":"DailyTrigger","TimeOfDayTicks":108000000000}]'
+)
+tareas="$(api GET /ScheduledTasks)" || { echo "No pude leer las tareas programadas"; exit 2; }
+for clave in RefreshLibrary RefreshPeople RefreshChapterImages RefreshTrickplayImages; do
+    tarea="$(jq -c --arg k "$clave" '.[] | select(.Key == $k)' <<<"$tareas")"
+    [ -z "$tarea" ] && { echo "  aviso   tarea $clave no existe en esta version"; continue; }
+    fuera="$(jq -r --argjson h "$HORA" '
+        [.Triggers[] | select(
+            (.Type != "DailyTrigger" and .Type != "WeeklyTrigger")
+            or .TimeOfDayTicks < 1 * $h or .TimeOfDayTicks >= 6 * $h)] | length' <<<"$tarea")"
+    if [ "$fuera" = 0 ]; then
+        echo "  ok      tarea $clave: de madrugada"
+    elif [ "$aplicar" = 1 ]; then
+        if api POST "/ScheduledTasks/$(jq -r .Id <<<"$tarea")/Triggers" "${VENTANA[$clave]}" >/dev/null; then
+            echo "  aplico  tarea $clave: $(jq -c '[.Triggers[].Type]' <<<"$tarea") -> ventana de madrugada"
+        else
+            echo "  FALLO   tarea $clave: no pude reprogramarla"; deriva=1
+        fi
+    else
+        echo "  DERIVA  tarea $clave: $fuera disparador(es) fuera de la ventana 01:00-06:00"
+        deriva=1
+    fi
+done
 
 exit "$deriva"

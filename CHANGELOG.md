@@ -9,6 +9,21 @@ El cierre de cada gate AI-DLC corta versión (Gate 0 → 0.1.0, Gate 1 → 0.2.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-09-18
+
+**Gate 3 (Testing) aprobado.**
+
+### Cambiado
+- **RF03 se cumple con el preset `superfast`** (HITL): con el tope de 3 CPU y el host libre, el
+  transcode HEVC 10 bit a 1080p da 0,92x con `veryfast` y 1,13x con `superfast`. `politicas.sh`
+  lo aplica y verifica (`EncoderPreset`).
+- **Tareas pesadas de Jellyfin de madrugada:** escaneo diario a las 04:00 (de fábrica era "cada
+  12 h" y podía caer a cualquier hora), personas los domingos a las 05:00. `politicas.sh`
+  comprueba que escaneo, personas, capítulos y miniaturas caigan entre la 01:00 y las 06:00.
+- ADR-0002 pasa a 1.1.0 con ambas decisiones.
+- `.gitattributes` fuerza LF: un clon de Windows con `core.autocrlf=true` dejaba los scripts con
+  CRLF, y copiados al appliance rompen bash.
+
 ### Añadido
 - `deploy/tests/docker-compose.staging.yml`: el compose de producción levantado en el appliance
   junto al despliegue actual (puerto 18096, base propia), sin receptor ni GHCR.
@@ -21,12 +36,14 @@ El cierre de cada gate AI-DLC corta versión (Gate 0 → 0.1.0, Gate 1 → 0.2.0
 - Verificado en la red real que Docker conserva la IP del cliente LAN en el puerto publicado (F3)
   y que un contenedor de `docker0` cuenta como remoto (F2).
 
-### Pendiente
-- **H5: el transcode con `cpus: 3.0` no llega a tiempo real en el appliance:** 0,78x con el
-  Jellyfin manual escaneando y **0,92x sin contención** (producción pausada 82 s con autorización).
-  Con preset `superfast` y el mismo tope: **1,13x**; con `veryfast` y 4 CPU: 1,11x. RF03 queda
-  pendiente de decisión.
-- **H4:** arranque tras apagón sin probar; pasa al Gate 4.
+### Corregido
+- **H5, RF03 en el appliance:** con el preset de fábrica y `cpus: 3.0`, 0,78x con el Jellyfin
+  manual escaneando y 0,92x sin contención (dos pausas de producción autorizadas, 82 s y 124 s,
+  sin clientes). Resuelto con `superfast` (1,13x); ver "Cambiado".
+
+### Trasladado al Gate 4
+- **H4:** arranque tras apagón sin probar (patrón `yggdrasil-arranque.service` y prueba de
+  reinicio con HITL).
 
 ## [0.3.0] - 2026-09-17
 
@@ -94,7 +111,8 @@ El cierre de cada gate AI-DLC corta versión (Gate 0 → 0.1.0, Gate 1 → 0.2.0
   escenarios de abuso, C4 de contexto, journey, requirementDiagram, DFD y DREAD inicial.
 - Checklists de gates 0–5.
 
-[Unreleased]: https://github.com/higerotech/bragi/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/higerotech/bragi/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/higerotech/bragi/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/higerotech/bragi/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/higerotech/bragi/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/higerotech/bragi/releases/tag/v0.1.0
