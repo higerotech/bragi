@@ -1,0 +1,4 @@
+# Finales de linea LF siempre, tambien en clones de Windows con core.autocrlf=true:
+# un script con CRLF copiado al appliance rompe bash (cada linea arrastra un retorno de carro).
+* text=auto eol=lf
+*.png binary

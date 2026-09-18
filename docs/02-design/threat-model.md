@@ -35,7 +35,7 @@ midgard; TB3 = red Docker; TB4 = midgard↔NAS.*
 | T1 | Flujo 1/3 | S | Fuerza bruta de contraseñas por el túnel | Límite de tasa CF + contraseñas ≥ 12. El bloqueo por intentos **no funciona en 10.11.11** (H1) | RS03, RS09 |
 | T2 | Flujo 3 | S, E | `X-Forwarded-For` falso para parecer LAN y usar el admin | KnownProxies = solo IP del túnel; la red Docker fuera de `LocalNetworkSubnets` | RS04, ADR-0004 |
 | T3 | Jellyfin | E | Familiar intenta funciones de admin | Cuentas sin privilegios; admin sin acceso remoto | RS02 |
-| T4 | Jellyfin | D | Transcodes que ahogan al router | `cpus 3.0`, `cpu_shares 512`, sin límite de bitrate remoto | RNF01, RNF04, ADR-0002 |
+| T4 | Jellyfin | D | Transcodes que ahogan al router | `cpus 3.0`, `cpu_shares 512`, sin límite de bitrate remoto, preset `superfast`, tareas pesadas de madrugada. Verificado: 0 alertas de Heimdall en 4 transcodes | RNF01, RNF04, ADR-0002 |
 | T5 | Jellyfin | E, T | RCE en Jellyfin toca biblioteca o host | Sin root, `cap_drop ALL`, `no-new-privileges`, biblioteca `ro` | RS05, RS08 |
 | T6 | Imágenes | T | Imagen alterada o `latest` que cambia solo | Digest pineado; sync sobre Alpine pineado | RS06, ADR-0001 |
 | T7 | Flujo 6 | I, T | El NAS exportaba a `*`: cualquier equipo LAN montaba la biblioteca | Export restringido a la IP del appliance (2026-09-17, verificado); `verificar-media.sh` avisa si vuelve a `*` | AB07 |

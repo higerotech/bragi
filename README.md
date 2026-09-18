@@ -9,21 +9,24 @@ repo hermano de [Yggdrasil](https://github.com/higerotech/yggdrasil) (monitor de
 de [Fenrir](https://github.com/higerotech/fenrir) (NVR), y sigue su convención de nombres.
 
 ## Estado
-Gates 0, 1 y 2 aprobados (0.3.0). Siguiente: Gate 3, pruebas en el appliance.
+Gates 0 a 3 aprobados (0.4.0). Siguiente: Gate 4, despliegue con el receptor.
 
 | Gate | Estado |
 |---|---|
 | 0 Requirements | Aprobado 2026-09-17 (0.1.0) |
 | 1 Design | Aprobado 2026-09-17 (0.2.0) |
 | 2 Implementation | Aprobado 2026-09-17 (0.3.0) |
-| 3–5 | Pendientes |
+| 3 Testing | Aprobado 2026-09-18 (0.4.0) |
+| 4–5 | Pendientes |
 
 ## Números que mandan el diseño
 Medidos en el appliance el 2026-09-17:
 
 - Reproducción directa: CPU ≈ 0; el NAS entrega 107 MB/s.
-- Transcode HEVC 10 bit → H.264 1080p por software: 1,42x sin tope, ~1,25x con `cpus: 3.0`.
-  **Cabe un transcode, no dos.**
+- Transcode HEVC 10 bit → H.264 1080p por software con `cpus: 3.0` (Gate 3, host libre): 0,92x
+  con el preset de fábrica y **1,13x con `superfast`**, que es el que se usa. **Cabe un
+  transcode, no dos**, y no mientras corre un escaneo (por eso las tareas pesadas van de
+  madrugada).
 - La iGPU (HD 2500, Gen7) no decodifica HEVC: la aceleración por hardware no ayuda aquí.
 
 ## Estructura

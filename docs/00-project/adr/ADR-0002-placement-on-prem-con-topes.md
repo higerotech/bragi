@@ -4,7 +4,7 @@
 * **Fecha:** 2026-09-17
 * **Decisores:** Jeremi
 * **Fase AI-DLC:** 02-design
-* **Versión:** 1.0.0
+* **Versión:** 1.1.0
 * **ID:** ADR-0002
 * **Supersede / Superseded-by:** —
 * **Controles OWASP afectados:** A06 (diseño inseguro: disponibilidad del router)
@@ -35,6 +35,14 @@ Bragi corre en midgard con:
 - `mem_limit: 2g` y `pids_limit: 512`.
 - Política de clientes que empuja a reproducción directa: sin límite de bitrate remoto por
   debajo del máximo de la biblioteca (4 Mbps). Sin límite de sesiones por cuenta familiar.
+- **Preset de x264 `superfast`** (Gate 3, HITL 2026-09-18). Con el tope de 3.0 y el host libre,
+  un HEVC 10 bit a 1080p da 0,92x con `veryfast` (el de fábrica) y **1,13x con `superfast`**,
+  algo más incluso que `veryfast` sin tope (4.0: 1,11x). Se cambia algo de calidad en los
+  transcodes por mantener el tope.
+- **Tareas pesadas de madrugada** (01:00–06:00): escaneo diario a las 04:00, personas los
+  domingos a las 05:00, capítulos a las 02:00 y miniaturas a las 03:00. Con un escaneo en marcha
+  el transcode baja a 0,78x.
+- Ambas cosas las aplica y verifica `politicas.sh`.
 
 ## Alternativas consideradas
 | Opción | Pros | Contras |
@@ -48,5 +56,7 @@ Bragi corre en midgard con:
 - Positivas: el router queda protegido por el kernel y no por la buena voluntad del servicio.
 - Negativas: un solo transcode; los clientes que no decodifican HEVC (algunos TV viejos) no
   tendrán fluidez si coinciden dos.
+- Margen de RF03 estrecho (13 %): un transcode que coincida con una tarea pesada no llegará a
+  tiempo real.
 - Condiciones de revisión: si hacen falta dos transcodes simultáneos, o si Heimdall muestra
   impacto en las WAN durante un transcode, pasar a hardware dedicado con Quick Sync.

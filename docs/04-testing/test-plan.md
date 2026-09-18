@@ -1,10 +1,10 @@
 # Plan y evidencia de pruebas — Bragi
 
-* **Estado:** review
+* **Estado:** approved (Gate 3, 2026-09-18)
 * **Fecha:** 2026-09-17
 * **Decisores:** Jeremi
 * **Fase AI-DLC:** 04-testing
-* **Versión:** 0.4.0-dev
+* **Versión:** 0.4.0
 * **Gate:** 3
 
 Dos niveles de prueba, con los mismos artefactos que producción:
@@ -75,7 +75,7 @@ C4Container
 | ID | Hallazgo | Estado |
 |---|---|---|
 | H4 | **No probado aún: arranque tras un apagón.** Yggdrasil descubrió (su TA-13) que Docker no reaplica `restart: unless-stopped` a un contenedor que falla durante la restauración tras un apagado sucio. Bragi tiene un motivo extra para fallar ahí: si el automount NFS no está listo, runc no puede hacer el bind de `/media` y el contenedor no arranca | Gate 4: unidad de arranque equivalente a `yggdrasil-arranque.service` y prueba de reinicio con HITL |
-| H5 | **RF03 falla bajo contención: 0,78x.** Durante la prueba, el Jellyfin manual de producción estaba en su primer escaneo (≈28 % de CPU sostenida, 16 % de iowait) y un contenedor de otro stack tuvo un pico del 95 %. La carga del host era 2,6 **antes** de empezar. La estimación de diseño (~1,25x) salía de una medida sin contención | **Medido sin contención:** `veryfast` con 3.0 da 0,92x; **`superfast` con 3.0 da 1,13x**, algo mejor incluso que `veryfast` sin tope efectivo (4.0: 1,11x). La estimación de ~1,25x venía de otro fichero. El margen es estrecho (13 %): con un escaneo en marcha no llegaría. Decisión de diseño pendiente (HITL) |
+| H5 | **RF03 falla bajo contención: 0,78x.** Durante la prueba, el Jellyfin manual de producción estaba en su primer escaneo (≈28 % de CPU sostenida, 16 % de iowait) y un contenedor de otro stack tuvo un pico del 95 %. La carga del host era 2,6 **antes** de empezar. La estimación de diseño (~1,25x) salía de una medida sin contención | **Medido sin contención:** `veryfast` con 3.0 da 0,92x; **`superfast` con 3.0 da 1,13x**, algo mejor incluso que `veryfast` sin tope efectivo (4.0: 1,11x). La estimación de ~1,25x venía de otro fichero. El margen es estrecho (13 %): con un escaneo en marcha no llegaría. **Decidido (HITL 2026-09-18): `superfast` con el tope de 3.0 y tareas pesadas de madrugada**, ambos aplicados por `politicas.sh` (ADR-0002 1.1.0). Verificado en staging |
 
 **Lectura de H5 para el diseño, sea cual sea la repetición:** mientras Jellyfin escanea, un
 transcode no llega a tiempo real con el tope actual. El escaneo inicial es puntual, pero los
@@ -86,5 +86,6 @@ debía: el router no se enteró (C2).
 ## Pendiente para cerrar el Gate 3
 - [x] Repetir C1 sin contención (H5): 0,92x.
 - [x] Medir alternativas sin contención: `superfast` a 3.0 = 1,13x; `veryfast` a 4.0 = 1,11x.
-- [ ] **HITL:** decidir cómo se cumple RF03. Recomendación: `superfast` manteniendo el tope de 3.0.
-- [ ] Ejecutar el CI sobre esta rama.
+- [x] **HITL:** `superfast` con el tope de 3.0 y tareas pesadas de madrugada (2026-09-18).
+- [x] `politicas.sh --aplicar` y `--verificar` contra el staging: preset y ventana de tareas aplicados, sin deriva.
+- [x] CI verde (PR #7 y siguientes).
