@@ -1,0 +1,24 @@
+# Override de STAGING para el Gate 3: levanta el compose real de Bragi en el appliance, al lado
+# del despliegue existente, sin pasar por el receptor ni por GHCR.
+#
+#   docker compose -f deploy/docker-compose.yml -f deploy/tests/docker-compose.staging.yml \
+#       --env-file <env de staging> up -d
+#
+# Diferencias con produccion, y solo estas:
+#   - bragi-sync se construye en local (bragi-sync:staging) en vez de bajarse de GHCR.
+#   - sync no hace checkout: el clon de staging ya esta en el commit que se prueba.
+#   - Jellyfin publica en otro puerto (18096) y se llama bragi-staging.
+# BRAGI_DATA debe apuntar a un directorio propio: staging nunca toca la base de produccion.
+
+services:
+  sync:
+    image: bragi-sync:staging
+    entrypoint: ["true"]
+
+  config:
+    image: bragi-sync:staging
+
+  jellyfin:
+    container_name: bragi-staging
+    ports: !override
+      - "${HOST_LAN_IP:?define HOST_LAN_IP}:${BRAGI_PUERTO:-18096}:8096"
