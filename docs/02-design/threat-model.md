@@ -1,10 +1,10 @@
 # Threat model — Bragi
 
-* **Estado:** review
+* **Estado:** approved (Gate 1, 2026-09-17)
 * **Fecha:** 2026-09-17
 * **Decisores:** Jeremi
 * **Fase AI-DLC:** 02-design
-* **Versión:** 0.1.0
+* **Versión:** 0.2.0
 * **Alcance:** Jellyfin, túnel, tarea sync, montaje NFS y datos en midgard
 * **Metodología:** STRIDE por elemento del DFD + DREAD para priorizar
 
