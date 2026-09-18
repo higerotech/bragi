@@ -1,0 +1,7 @@
+.env
+deploy/.env
+*.bak-*
+
+# Datos de Jellyfin si alguien levanta el compose en local
+config/
+cache/
