@@ -28,6 +28,7 @@ despliega y, si el health falla, vuelve al commit anterior.
 
 ## Consecuencias
 - Positivas: rollback trivial por commit; ninguna dependencia de nubes para autenticar.
+- **Decidido antes del túnel (2026-09-18): se mantiene 10.11.11**; ver ADR-0004 1.1.0.
 - **Decisión de versión (HITL 2026-09-17, hallazgo H1):** se queda la 10.11.11 mientras Bragi sea
   solo LAN. Antes de activar el túnel (Gate 4) se decide entre 10.11.11 y 12.x con estos datos: el
   bloqueo por intentos no funciona en 10.11.11 (jellyfin#17278), la 12.0 tiene un OOM en

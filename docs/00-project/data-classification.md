@@ -14,6 +14,7 @@
 | `TUNNEL_TOKEN` | **Confidencial** | `deploy/.env` 0600 | Fuera del repo (`.gitignore`) | No viaja: lo usa `cloudflared` | Hasta rotación |
 | Historial de visionado, usuarios, dispositivos | **Interno (personal)** | SQLite de Jellyfin | Igual que el resto de la config | Solo por la API autenticada | Indefinida; sin requisito legal |
 | Biblioteca de medios | **Interno** | NAS por NFS | Montaje solo lectura en Bragi | Streaming autenticado | Fuera del alcance de Bragi |
+| Respaldos de la configuración | **Confidencial** (contienen los hashes de las contraseñas y los tokens de sesión) | Share `respaldos` del NAS | Export NFS solo al appliance | NFS en la LAN | 14 días |
 | Metadatos y carátulas descargados | **Público** | `/var/lib/bragi/config/metadata` | — | Salida a TMDB y similares | Regenerable |
 | IPs, hostnames y MACs de la instalación | **Interno** | Solo `deploy/.env` y la cabeza del operador | El repo es público: ejemplos RFC 5737 | — | — |
 

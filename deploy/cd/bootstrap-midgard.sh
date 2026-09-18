@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Prepara el appliance para desplegar Bragi con el receptor de despliegue-continuo (ADR-0003).
 # Idempotente y sin secretos. Ejecutar como root:
-#   sudo BRANCH=main bash deploy/cd/bootstrap-midgard.sh
+#   sudo BRANCH=main TZ_HOGAR=America/Caracas bash deploy/cd/bootstrap-midgard.sh
 #
 # NO migra datos ni para nada: eso es deploy/cd/migrar-desde-manual.sh, en la ventana de corte.
 # Despues: webhook en GitHub (docs/05-deployment/deployment.md, paso 3).
@@ -55,7 +55,13 @@ if [ ! -f "$ENV_FILE" ]; then
     fijar PGID "$(id -g bragi)"
     fijar RENDER_GID "$(getent group render | cut -d: -f3)"
     fijar VIDEO_GID "$(getent group video | cut -d: -f3)"
-    fijar TZ "$(timedatectl show -p Timezone --value 2>/dev/null || echo UTC)"
+    # La zona de la CASA, no la del host: el appliance suele ir en UTC, y la ventana de tareas
+    # pesadas (01:00-06:00, hora del contenedor) caeria en plena noche. Pasar TZ_HOGAR.
+    tz_host="$(timedatectl show -p Timezone --value 2>/dev/null || echo UTC)"
+    fijar TZ "${TZ_HOGAR:-$tz_host}"
+    case "${TZ_HOGAR:-$tz_host}" in
+        UTC|Etc/UTC) echo "   AVISO: TZ=UTC; define TZ_HOGAR (p. ej. America/Caracas) o corrige deploy/.env" ;;
+    esac
     fijar DEPLOY_UID "$(id -u deploy)"
     fijar DEPLOY_GID "$(id -g deploy)"
     echo "   creado (LAN $LAN_SUBNET, IP $LAN_IP, PUID $(id -u bragi))"

@@ -4,7 +4,7 @@
 * **Fecha:** 2026-09-17
 * **Decisores:** Jeremi
 * **Fase AI-DLC:** 02-design
-* **Versión:** 1.0.0
+* **Versión:** 1.1.0
 * **ID:** ADR-0004
 * **Supersede / Superseded-by:** —
 * **Controles OWASP afectados:** A01 (control de acceso), A05 (configuración), A07 (autenticación)
@@ -78,6 +78,14 @@ gratuita, o pasar a WireGuard (opción C).
 3. Admin con `EnableRemoteAccess=false`.
 4. Regla de límite de tasa en la zona sobre `/Users/AuthenticateByName`.
 5. `LoginAttemptsBeforeLockout` en todas las cuentas.
+
+## Verificación (2026-09-18)
+Túnel activo en producción. Desde internet: TLS válido, Jellyfin registra la IP pública real, el
+admin no entra desde fuera y la regla de límite de tasa bloquea las ráfagas contra el login (429).
+El límite del plan gratuito es aproximado: deja pasar la primera ráfaga casi entera antes de
+bloquear. El bloqueo por intentos de Jellyfin no funciona en 10.11.11 (H1), así que frente a T1
+quedan el límite de tasa y la longitud de la clave. **Ninguna cuenta con acceso remoto puede
+tener menos de 12 caracteres.**
 
 ## Consecuencias
 - Positivas: los clientes nativos de TV y móvil funcionan fuera de casa sin VPN; una suspensión
