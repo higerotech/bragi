@@ -29,7 +29,13 @@ Runbook: `docs/05-deployment/deployment.md` (C4 Deployment, pipeline con rollbac
       por Jeremi con su admin mediante `verificar-produccion.sh`, sin API key. Admin sin acceso
       remoto, bloqueo a 5 intentos, `superfast`, escaneo 04:00 y personas domingo 05:00 (hora de la
       casa). **F2: admin desde fuera de la LAN → 403.** `== bragi cumple ==`
-- [ ] **[Jeremi] H4:** prueba de reinicio con Bragi volviendo solo
+- [x] **[Jeremi] H4:** prueba de reinicio (2026-09-18, con Jeremi presente). `systemctl reboot` a
+      las 13:02 UTC: SSH a los 151 s; **Bragi `healthy` sin intervención** 2 min 45 s después del
+      arranque del sistema; `bragi-arranque` en `success` sin reintentos (el NAS respondió al
+      instante: 0 s de espera); túnel reconectado y `https://media.chatters.pro` respondiendo desde
+      fuera a los 3 min 21 s; los 16 contenedores de vuelta; el Jellyfin manual siguió parado;
+      0 alertas en Heimdall. Nota honesta: Docker ya había relanzado Bragi por su cuenta y la unidad
+      solo lo confirmó, así que el camino de NFS lento o del contenedor que no vuelve no se ejercitó
 - [x] Respaldo nocturno (T10, ADR-0008): timer a las 05:30 de la casa al share `respaldos`
       (exportado solo al appliance), base copiada en caliente y con `integrity_check`, 23 MB,
       14 días. **Simulacro de restauración superado** (2026-09-18): mismo Id, asistente completado,
@@ -49,3 +55,7 @@ Runbook: `docs/05-deployment/deployment.md` (C4 Deployment, pipeline con rollbac
      el resto de rutas sigue en 200 y se levanta a los 10 s. **Es aproximado:** la primera ráfaga
      casi entera pasa antes de que salte;
   5. bloqueo por intentos: **no funciona en 10.11.11** (H1), aceptado con el control 4
+
+Evidencia: C4 Deployment, pipeline y gantt en el runbook; salidas de `prueba-appliance.sh`, del
+simulacro de restauración y de la prueba de reinicio.
+**Aprobado 2026-09-18.** Cortado `0.5.0`.

@@ -9,7 +9,7 @@ repo hermano de [Yggdrasil](https://github.com/higerotech/yggdrasil) (monitor de
 de [Fenrir](https://github.com/higerotech/fenrir) (NVR), y sigue su convención de nombres.
 
 ## Estado
-Gates 0 a 3 aprobados (0.4.0). Siguiente: Gate 4, despliegue con el receptor.
+Gates 0 a 4 aprobados (0.5.0): **en producción** desde el 2026-09-18, con acceso externo por el túnel y respaldo nocturno. Siguiente: Gate 5, observabilidad en Heimdall.
 
 | Gate | Estado |
 |---|---|
@@ -17,7 +17,8 @@ Gates 0 a 3 aprobados (0.4.0). Siguiente: Gate 4, despliegue con el receptor.
 | 1 Design | Aprobado 2026-09-17 (0.2.0) |
 | 2 Implementation | Aprobado 2026-09-17 (0.3.0) |
 | 3 Testing | Aprobado 2026-09-18 (0.4.0) |
-| 4–5 | Pendientes |
+| 4 Deployment | Aprobado 2026-09-18 (0.5.0) |
+| 5 Monitoring | Pendiente |
 
 ## Números que mandan el diseño
 Medidos en el appliance el 2026-09-17:

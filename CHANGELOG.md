@@ -9,6 +9,17 @@ El cierre de cada gate AI-DLC corta versión (Gate 0 → 0.1.0, Gate 1 → 0.2.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-09-18
+
+**Gate 4 (Deployment) aprobado.** Bragi en producción, desplegado por el receptor, con acceso
+externo por el túnel y respaldo nocturno verificado.
+
+### Verificado
+- **Prueba de reinicio (H4):** tras `systemctl reboot`, Bragi volvió `healthy` sin intervención
+  a los 2 min 45 s del arranque, y el túnel respondía desde fuera a los 3 min 21 s. Los 16
+  contenedores del appliance volvieron y Heimdall no dio alertas.
+- El respaldo programado de la madrugada corrió solo (05:36 hora de la casa, 24 MB, verificado).
+
 ### Desplegado
 - **Respaldo nocturno de la configuración** (ADR-0008) al share `respaldos` del NAS: copia en
   caliente de la base con `integrity_check`, 23 MB, 14 días, a las 05:30 de la casa y con
@@ -161,7 +172,8 @@ publica la primera `bragi-sync` para el receptor.
   escenarios de abuso, C4 de contexto, journey, requirementDiagram, DFD y DREAD inicial.
 - Checklists de gates 0–5.
 
-[Unreleased]: https://github.com/higerotech/bragi/compare/v0.5.0-rc.1...HEAD
+[Unreleased]: https://github.com/higerotech/bragi/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/higerotech/bragi/compare/v0.5.0-rc.1...v0.5.0
 [0.5.0-rc.1]: https://github.com/higerotech/bragi/compare/v0.4.0...v0.5.0-rc.1
 [0.4.0]: https://github.com/higerotech/bragi/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/higerotech/bragi/compare/v0.2.0...v0.3.0
