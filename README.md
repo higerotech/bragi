@@ -9,13 +9,13 @@ repo hermano de [Yggdrasil](https://github.com/higerotech/yggdrasil) (monitor de
 de [Fenrir](https://github.com/higerotech/fenrir) (NVR), y sigue su convención de nombres.
 
 ## Estado
-Gates 0 y 1 aprobados (0.2.0). Gate 2 en curso.
+Gates 0, 1 y 2 aprobados (0.3.0). Siguiente: Gate 3, pruebas en el appliance.
 
 | Gate | Estado |
 |---|---|
 | 0 Requirements | Aprobado 2026-09-17 (0.1.0) |
 | 1 Design | Aprobado 2026-09-17 (0.2.0) |
-| 2 Implementation | Implementado; faltan el CI verde y dos decisiones (H1, H2) |
+| 2 Implementation | Aprobado 2026-09-17 (0.3.0) |
 | 3–5 | Pendientes |
 
 ## Números que mandan el diseño

@@ -8,6 +8,7 @@
 - [x] Charter + glosario (lenguaje ubicuo)
 - [x] **HITL**: alcance, no-scope (un transcode, sin DLNA, sin adquisición de contenido) y
       límite de 2 sesiones por cuenta familiar validados por Jeremi el 2026-09-17.
+      *Revisado en Gate 2 (H2):* RNF04 pasa a sin límite, PRD 0.1.1.
 
 Evidencia: journey + requirementDiagram + DFD/quadrant en el PRD.
 **Aprobado 2026-09-17.** Cortado `0.1.0`; charter, glosario, clasificación y PRD en `approved`.
