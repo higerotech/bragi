@@ -11,12 +11,20 @@ Runbook: `docs/05-deployment/deployment.md` (C4 Deployment, pipeline con rollbac
 - [x] Rollback de la migración documentado
 
 ## Ejecución en el appliance
-- [ ] Release a `main` y build de `bragi-sync`
-- [ ] **[Jeremi]** Paquete GHCR `bragi-sync` público
-- [ ] Desmontar el staging del Gate 3 (`~/bragi-staging`), que usa los nombres de producción
-- [ ] `bootstrap-midgard.sh`
-- [ ] **[Jeremi]** Webhook `workflow_run` en el repo
-- [ ] Ventana de corte (autorizada por Jeremi) y primer despliegue por el receptor
+- [x] Release `v0.5.0-rc.1` a `main` y build de `bragi-sync` (2026-09-18)
+- [x] **[Jeremi]** Paquete GHCR `bragi-sync` público (manifest anónimo: 200)
+- [x] Staging del Gate 3 desmontado
+- [x] `bootstrap-midgard.sh` (usuario `bragi` 995:986, `/var/lib/bragi`, clon, `.env`, receptor
+      recargado con `bragi`, unidad habilitada). Corregido a mano `TZ=Etc/UTC` → zona de la casa
+- [x] **[Jeremi]** Webhook `workflow_run` (id 681171011); ping 202 con firma válida
+- [x] Ventana de corte autorizada por Jeremi (2026-09-18): 0 clientes, `migrar-desde-manual.sh`
+      copió 2,7 GB con la base cerrada limpia (sin WAL). Primer despliegue por el receptor:
+      `despliegue OK bragi sha-b1dd0f2 en 32.1s`. **Servicio cortado 03:31:19–03:36:52 UTC (5 min 33 s)**
+- [x] Verificado sin credenciales: usuario 995 `bragi`, `cap_drop ALL`, `no-new-privileges`, topes
+      3 CPU / 2 GiB / shares 512, puerto solo en la IP LAN, digest, `/media` `ro`+`rslave`,
+      `network.xml` con la LAN real, TZ de la casa, 0 errores en el arranque. **Mismo Id de
+      servidor** que el Jellyfin manual: la base migrada cargó entera. El manual queda parado,
+      sin reinicio automático y con su directorio intacto
 - [ ] `politicas.sh --aplicar` contra producción (API key de Jeremi) y `prueba-appliance.sh` limpio
 - [ ] **[Jeremi] H4:** prueba de reinicio con Bragi volviendo solo
 - [ ] Respaldo de `/var/lib/bragi/config` (T10), sobre todo antes de cualquier subida de versión
