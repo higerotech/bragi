@@ -35,13 +35,36 @@ services:
     volumes:
       - ..:/repo
 
+  # --- Tarea de un solo uso: escribe network.xml de Jellyfin desde el repo (ADR-0006) ---
+  # Como el usuario de Jellyfin y sin red. La plantilla va horneada en la imagen porque el PUID
+  # no puede leer el clon (750 deploy:deploy).
+  config:
+    image: ghcr.io/higerotech/bragi-sync:${IMAGE_TAG:?IMAGE_TAG es obligatorio}
+    container_name: bragi-config
+    entrypoint: ["/usr/local/bin/config.sh"]
+    user: "${PUID:?define PUID en .env}:${PGID:?define PGID en .env}"
+    restart: "no"
+    read_only: true
+    tmpfs: [/tmp]
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+    network_mode: none
+    environment:
+      LAN_SUBNET: ${LAN_SUBNET:?define LAN_SUBNET en .env}
+      TUNEL_IP: ${TUNEL_IP:-172.30.50.10}
+    volumes:
+      - ${BRAGI_DATA:-/var/lib/bragi}/config:/salida
+    depends_on:
+      sync:
+        condition: service_completed_successfully
+
   jellyfin:
     # Version pineada por digest: subirla es un PR que cambia esta linea (ADR-0001).
     image: jellyfin/jellyfin:10.11.11@sha256:aefb67e6a7ff1debdd154a78a7bbb780fd0c873d8639210a7f6a2016ad2b35db
     container_name: bragi
     restart: unless-stopped
     depends_on:
-      sync:
+      config:
         condition: service_completed_successfully
 
     # --- Los topes (ADR-0002) ---
@@ -86,6 +109,9 @@ services:
           propagation: rslave
 
     environment:
+      # Cambia en cada despliegue y fuerza a recrear el contenedor: Jellyfin solo lee
+      # network.xml al arrancar, y sin esto un cambio de la plantilla no entraria.
+      BRAGI_REV: ${IMAGE_TAG}
       TZ: ${TZ:-UTC}
       JELLYFIN_PublishedServerUrl: ${PUBLISHED_URL:-http://${HOST_LAN_IP}:8096}
 

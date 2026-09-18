@@ -15,7 +15,7 @@ Gates 0 y 1 aprobados (0.2.0). Gate 2 en curso.
 |---|---|
 | 0 Requirements | Aprobado 2026-09-17 (0.1.0) |
 | 1 Design | Aprobado 2026-09-17 (0.2.0) |
-| 2 Implementation | En curso |
+| 2 Implementation | Implementado; faltan el CI verde y dos decisiones (H1, H2) |
 | 3–5 | Pendientes |
 
 ## Números que mandan el diseño
@@ -31,10 +31,13 @@ Medidos en el appliance el 2026-09-17:
 deploy/
   docker-compose.yml    # jellyfin + sync (+ tunel bajo perfil)
   .env.example          # copiar a deploy/.env en el servidor, 0600
-  sync/                 # imagen bragi-sync: checkout del commit desplegado
+  sync/                 # imagen bragi-sync: checkout del commit y network.xml (config.sh)
   scripts/
     probar-limites.sh   # mide si el tope de CPU sostiene un transcode
     verificar-media.sh  # comprueba el NFS antes de recrear
+    politicas.sh        # aplica y verifica las politicas de cuenta por la API
+  tests/
+    prueba-proxy.sh     # integracion: ataca la frontera de confianza con Jellyfin real
 docs/
   00-project/           # charter, glosario, clasificación, ADRs
   01-requirements/      # PRD con abuso, ASVS y threat assessment

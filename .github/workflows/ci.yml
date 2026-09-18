@@ -1,0 +1,100 @@
+# CI de Bragi (Gate 2). Valida configuracion, scripts e imagen, y ejecuta la prueba de
+# integracion de la frontera de confianza contra un Jellyfin real (deploy/tests/prueba-proxy.sh).
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [develop, main]
+  schedule:
+    - cron: "23 6 * * 1"   # lunes 06:23 UTC: informe semanal de Trivy sobre las imagenes pineadas
+
+permissions:
+  contents: read
+
+env:
+  JELLYFIN: jellyfin/jellyfin:10.11.11@sha256:aefb67e6a7ff1debdd154a78a7bbb780fd0c873d8639210a7f6a2016ad2b35db
+  CLOUDFLARED: cloudflare/cloudflared:2026.8.3@sha256:51c9cefcb4569df44e1ad403ab1d3d8065aa8e84339bcfc6aee75502e1140339
+
+jobs:
+  configs:
+    name: "Configs: compose, shellcheck, imagen sync"
+    if: github.event_name != 'schedule'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: docker compose config (sin tunel y con tunel)
+        working-directory: deploy
+        run: |
+          export IMAGE_TAG=sha-0000000
+          docker compose --env-file .env.example config -q
+          COMPOSE_PROFILES=tunel TUNNEL_TOKEN=ci docker compose --env-file .env.example config -q
+      - name: El puerto nunca se publica en 0.0.0.0 (RS01)
+        working-directory: deploy
+        run: |
+          IMAGE_TAG=sha-0000000 COMPOSE_PROFILES=tunel TUNNEL_TOKEN=ci \
+            docker compose --env-file .env.example config --format json \
+            | jq -e '[.services[].ports[]? | select((.host_ip // "") == "" or .host_ip == "0.0.0.0")] | length == 0'
+      - name: Imagenes pineadas por digest (RS06)
+        working-directory: deploy
+        run: |
+          IMAGE_TAG=sha-0000000 COMPOSE_PROFILES=tunel TUNNEL_TOKEN=ci \
+            docker compose --env-file .env.example config --format json \
+            | jq -r '.services[].image' | grep -v '^ghcr.io/higerotech/bragi-sync:' \
+            | while read -r img; do
+                case "$img" in *@sha256:*) echo "ok  $img" ;; *) echo "SIN DIGEST: $img"; exit 1 ;; esac
+              done
+      - name: Construir bragi-sync
+        run: docker build -q -t bragi-sync:ci deploy/sync
+      - name: config.sh rechaza valores invalidos y escribe los validos
+        run: |
+          d="$(mktemp -d)"; chmod 0777 "$d"
+          run() { docker run --rm --user 1000:1000 --network none -v "$d:/salida" \
+                    -e LAN_SUBNET="$1" -e TUNEL_IP="$2" --entrypoint /usr/local/bin/config.sh bragi-sync:ci; }
+          ! run 192.0.2.0 172.30.50.10          # sin mascara
+          ! run 192.0.2.0/33 172.30.50.10       # mascara fuera de rango
+          ! run 192.0.2.0/24 172.30.50.300      # IP invalida
+          ! run '192.0.2.0/24</string>' 172.30.50.10   # intento de inyectar XML
+          run 192.0.2.0/24 172.30.50.10
+          grep -q '<string>192.0.2.0/24</string>' "$d/config/network.xml"
+          grep -q '<string>172.30.50.10</string>' "$d/config/network.xml"
+          ! grep -q '@@' "$d/config/network.xml"
+      - name: ShellCheck
+        run: |
+          docker run --rm -v "$PWD:/mnt:ro" -w /mnt koalaman/shellcheck:v0.10.0 -S warning \
+            deploy/scripts/*.sh deploy/sync/*.sh deploy/tests/*.sh
+
+  integracion:
+    name: "Integracion: frontera de confianza (Jellyfin real)"
+    if: github.event_name != 'schedule'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: prueba-proxy.sh
+        run: bash deploy/tests/prueba-proxy.sh
+
+  secretos:
+    name: "Secretos: gitleaks"
+    if: github.event_name != 'schedule'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: gitleaks detect
+        run: docker run --rm -v "$PWD:/repo" zricethezav/gitleaks:v8.28.0 detect --source /repo --no-banner --redact --exit-code 1
+
+  imagenes:
+    name: "Cadena de suministro: Trivy (informe)"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Trivy config (misconfiguraciones en deploy/)
+        run: docker run --rm -v "$PWD/deploy:/deploy:ro" aquasec/trivy:0.66.0 config --exit-code 0 --severity HIGH,CRITICAL /deploy
+      - name: Trivy image (CRITICAL/HIGH, sin bloquear hasta triaje)
+        run: |
+          docker build -q -t bragi-sync:ci deploy/sync
+          for img in "$JELLYFIN" "$CLOUDFLARED" bragi-sync:ci; do
+            echo "== $img =="
+            docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy:0.66.0 image --exit-code 0 --severity HIGH,CRITICAL --ignore-unfixed "$img"
+          done

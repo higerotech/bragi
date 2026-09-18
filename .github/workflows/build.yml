@@ -1,0 +1,69 @@
+# Construye y publica en GHCR la imagen bragi-sync con el tag sha-<7> del commit. Al terminar con
+# exito, GitHub emite workflow_run al receptor de despliegue-continuo (ADR-0003), que despliega
+# ese mismo SHA en el appliance. El nombre 'build' debe coincidir con el campo `workflow` de la
+# entrada de Bragi en apps.yml. Mismo patron que yggdrasil.
+name: build
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:      # segundo despliegue cuando el commit cambia el Compose (job redespliegue)
+
+permissions:
+  contents: read
+  packages: write
+  actions: write        # para relanzarse a si mismo (redespliegue)
+
+# El grupo incluye el evento: el relanzamiento (workflow_dispatch) no debe cancelar el run del
+# push que lo lanzo; el receptor ignoraria un run 'cancelled' (leccion de yggdrasil 0.4.4).
+concurrency:
+  group: build-${{ github.ref }}-${{ github.event_name }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: docker/setup-buildx-action@v4
+      - uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ghcr.io/${{ github.repository }}-sync
+          tags: |
+            type=sha
+            type=raw,value=latest,enable={{is_default_branch}}
+      - uses: docker/build-push-action@v7
+        with:
+          context: deploy/sync
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=sync
+          cache-to: type=gha,mode=max,scope=sync
+
+  # El receptor levanta el stack con el Compose del checkout ANTERIOR (sync lo actualiza durante
+  # el propio despliegue). Si este push cambio el Compose, se pide un segundo despliegue.
+  redespliegue:
+    needs: build
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 2
+      - name: Relanzar si cambio el Compose
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if git diff --name-only HEAD~1 HEAD | grep -qx 'deploy/docker-compose.yml'; then
+            echo 'El commit cambia el Compose: se pide un segundo despliegue'
+            gh workflow run build.yml --ref main
+          else
+            echo 'El Compose no cambio; no hace falta redesplegar'
+          fi

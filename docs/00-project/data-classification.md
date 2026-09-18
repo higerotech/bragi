@@ -10,6 +10,7 @@
 |---|---|---|---|---|---|
 | Contraseñas de las cuentas | **Confidencial** | SQLite de Jellyfin (`/var/lib/bragi/config`), con hash | Directorio del usuario del servicio, fuera del repo | TLS del túnel desde fuera; **HTTP en claro dentro de la LAN** | Mientras exista la cuenta |
 | Tokens de sesión / API keys | **Confidencial** | SQLite de Jellyfin | Igual | Cabecera en cada petición | Hasta cerrar sesión o revocar |
+| API key de Jellyfin (para `politicas.sh`) | **Confidencial** | Solo en el panel de Jellyfin; se pasa por variable de entorno al ejecutar | No se guarda en ficheros ni en el repo | HTTP en la LAN | Revocar si se filtra |
 | `TUNNEL_TOKEN` | **Confidencial** | `deploy/.env` 0600 | Fuera del repo (`.gitignore`) | No viaja: lo usa `cloudflared` | Hasta rotación |
 | Historial de visionado, usuarios, dispositivos | **Interno (personal)** | SQLite de Jellyfin | Igual que el resto de la config | Solo por la API autenticada | Indefinida; sin requisito legal |
 | Biblioteca de medios | **Interno** | NAS por NFS | Montaje solo lectura en Bragi | Streaming autenticado | Fuera del alcance de Bragi |
