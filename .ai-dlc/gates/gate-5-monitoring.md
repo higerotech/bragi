@@ -16,6 +16,9 @@ y timeline) y ADR-0009.
 ## Instalación y verificación
 - [ ] Release a `main` (la imagen `bragi-sync` gana `busybox-extras`)
 - [ ] `deploy/metricas/instalar.sh` en el appliance y perfil `metricas` activo
+- [ ] `deploy/respaldo/instalar.sh` otra vez: `/usr/local/sbin/bragi-respaldar.sh` es una copia
+      instalada a mano y sin él el respaldo no escribe la marca de éxito (`metricas/instalar.sh`
+      solo la siembra una vez); sin reinstalar, `BragiRespaldoAtrasado` saltaría a las 30 h
 - [ ] PR en Yggdrasil con el job y las reglas, desplegado por su receptor
 - [ ] `up{job="bragi"} == 1` y series `bragi_*` en Mimir
 - [ ] **Extremo a extremo:** parar `bragi-metricas` más de 3 min → aviso push

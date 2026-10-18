@@ -9,6 +9,14 @@ El cierre de cada gate AI-DLC corta versión (Gate 0 → 0.1.0, Gate 1 → 0.2.0
 
 ## [Unreleased]
 
+## [0.6.0-rc.1] - 2026-10-18
+
+**Candidata del Gate 5 (Monitoring).** Lleva a `main` la observabilidad en Heimdall. Su build publica
+la `bragi-sync` con `busybox-extras`, que necesita `bragi-metricas`. Es candidata y no `0.6.0`
+porque el Gate 5 se cierra después de verificarlo en el appliance: series en Mimir, aviso push de
+extremo a extremo y SLO revisados con datos reales. Yggdrasil ya tiene el job y las reglas desde su
+0.5.6, así que `BragiSinMetricas` lleva disparada desde que llegaron hasta que esto se despliegue.
+
 ### Añadido
 - **Observabilidad en Heimdall (Gate 5, ADR-0009).** Recolector en el host cada 30 s que lee el
   cgroup de Bragi (CPU incluidos los `ffmpeg`, throttling, memoria anónima), cuenta los
@@ -18,6 +26,13 @@ El cierre de cada gate AI-DLC corta versión (Gate 0 → 0.1.0, Gate 1 → 0.2.0
 - Especificación para Heimdall en `deploy/prometheus/`: job, reglas de registro y 8 alertas, con
   pruebas unitarias de `promtool` en el CI.
 - `docs/06-monitoring/observability.md` con C4 Dynamic, secuencia, estado del incidente y timeline.
+
+### Corregido
+- **El segundo despliegue de una release ya no recrea los contenedores de `bragi-sync`.** El
+  relanzamiento de `build` que pide `redespliegue` (cuando el commit cambia el Compose)
+  reconstruía la imagen. Como el build no es reproducible, subía otro digest con el mismo tag
+  `sha-<7>` y el receptor recreaba todo lo que usa esa imagen. Ahora, si la imagen del commit ya
+  está en GHCR, `build` no la reconstruye. Es el mismo arreglo que yggdrasil#70.
 
 ### Cambiado
 - `respaldar.sh` escribe `/var/lib/bragi-respaldo/ultimo-exito` tras cada respaldo verificado.
@@ -186,7 +201,8 @@ publica la primera `bragi-sync` para el receptor.
   escenarios de abuso, C4 de contexto, journey, requirementDiagram, DFD y DREAD inicial.
 - Checklists de gates 0–5.
 
-[Unreleased]: https://github.com/higerotech/bragi/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/higerotech/bragi/compare/v0.6.0-rc.1...HEAD
+[0.6.0-rc.1]: https://github.com/higerotech/bragi/compare/v0.5.0...v0.6.0-rc.1
 [0.5.0]: https://github.com/higerotech/bragi/compare/v0.5.0-rc.1...v0.5.0
 [0.5.0-rc.1]: https://github.com/higerotech/bragi/compare/v0.4.0...v0.5.0-rc.1
 [0.4.0]: https://github.com/higerotech/bragi/compare/v0.3.0...v0.4.0
