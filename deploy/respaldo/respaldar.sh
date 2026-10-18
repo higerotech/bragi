@@ -58,3 +58,10 @@ mapfile -t viejos < <(ls -1t "$DESTINO"/bragi-config-*.tar.gz | tail -n +"$((RET
 for f in "${viejos[@]}"; do rm -f "$f" "$f.sha256"; done
 
 echo "respaldo: $nombre ($(du -h "$DESTINO/$nombre" | cut -f1)) verificado; ${#viejos[@]} antiguo(s) borrado(s)"
+
+# Estado para Heimdall (ADR-0009): solo se escribe tras un exito VERIFICADO, asi que un fallo
+# deja envejecer la marca y dispara BragiRespaldoAtrasado.
+ESTADO_DIR=${BRAGI_ESTADO_DIR:-/var/lib/bragi-respaldo}
+install -d -m 0755 "$ESTADO_DIR"
+echo "$(date +%s) $(stat -c %s "$DESTINO/$nombre")" > "$ESTADO_DIR/.ultimo-exito.tmp"
+mv -f "$ESTADO_DIR/.ultimo-exito.tmp" "$ESTADO_DIR/ultimo-exito"

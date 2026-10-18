@@ -1,0 +1,172 @@
+# Pruebas unitarias de las reglas de Bragi:
+#   promtool test rules deploy/prometheus/bragi-alertas.test.yml
+# Cada caso fija las series de entrada y comprueba que la alerta salta (o no) cuando debe.
+rule_files:
+  - bragi-alertas.yml
+
+evaluation_interval: 1m
+
+tests:
+  # --- BragiCaido: 3 min sin /health en la LAN ---
+  - interval: 1m
+    input_series:
+      - series: 'bragi_up{comprobacion="lan"}'
+        values: '0x6'
+    alert_rule_test:
+      - eval_time: 2m
+        alertname: BragiCaido
+        exp_alerts: []
+      - eval_time: 4m
+        alertname: BragiCaido
+        exp_alerts:
+          - exp_labels: {severity: critical, servicio: bragi, comprobacion: lan}
+            exp_annotations:
+              resumen: "Bragi no responde en la LAN"
+              descripcion: "/health no devuelve 200 desde hace 3 min. Diagnóstico: docker ps --filter name=bragi y journalctl -u bragi-arranque."
+
+  # --- BragiExternoCaido: fuera cae, dentro vive, la casa tiene ruta ---
+  - interval: 1m
+    input_series:
+      - series: 'bragi_up{comprobacion="externo"}'
+        values: '0x8'
+      - series: 'bragi_up{comprobacion="lan"}'
+        values: '1x8'
+      - series: 'hogar:ruta_up'
+        values: '1x8'
+    alert_rule_test:
+      - eval_time: 6m
+        alertname: BragiExternoCaido
+        exp_alerts:
+          - exp_labels: {severity: warning, servicio: bragi, comprobacion: externo}
+            exp_annotations:
+              resumen: "Bragi no responde desde fuera (túnel) aunque en la LAN sí"
+              descripcion: "Comprobar bragi-tunel (docker logs bragi-tunel) y el estado del túnel en Cloudflare."
+
+  # --- ...pero no si la casa entera está sin ruta: eso ya lo avisa HogarSinRuta ---
+  - interval: 1m
+    input_series:
+      - series: 'bragi_up{comprobacion="externo"}'
+        values: '0x8'
+      - series: 'bragi_up{comprobacion="lan"}'
+        values: '1x8'
+      - series: 'hogar:ruta_up'
+        values: '0x8'
+    alert_rule_test:
+      - eval_time: 6m
+        alertname: BragiExternoCaido
+        exp_alerts: []
+
+  # --- BragiSinMetricas: Mimir no consigue scrapear el recolector ---
+  - interval: 1m
+    input_series:
+      - series: 'up{job="bragi"}'
+        values: '0x6'
+    alert_rule_test:
+      - eval_time: 4m
+        alertname: BragiSinMetricas
+        exp_alerts:
+          - exp_labels: {severity: warning, servicio: bragi, job: bragi}
+            exp_annotations:
+              resumen: "Heimdall no recibe métricas de Bragi"
+              descripcion: "El recolector (bragi-metricas.timer) o el contenedor bragi-metricas no funcionan: sin ellos ninguna otra alerta de Bragi puede saltar."
+
+  # --- BragiRespaldoAtrasado: >30 h sin respaldo verificado; uno reciente no alerta ---
+  - interval: 1m
+    input_series:
+      - series: 'bragi_backup_last_success_timestamp_seconds'
+        values: '-200000x15'
+    alert_rule_test:
+      - eval_time: 12m
+        alertname: BragiRespaldoAtrasado
+        exp_alerts:
+          - exp_labels: {severity: warning, servicio: bragi}
+            exp_annotations:
+              resumen: "Bragi lleva más de 30 h sin un respaldo verificado"
+              descripcion: "Revisar systemctl status bragi-respaldo y que el share respaldos del NAS monte."
+  - interval: 1m
+    input_series:
+      - series: 'bragi_backup_last_success_timestamp_seconds'
+        values: '0+60x15'
+    alert_rule_test:
+      - eval_time: 12m
+        alertname: BragiRespaldoAtrasado
+        exp_alerts: []
+
+  # --- BragiMasDeUnTranscode: dos no caben en el tope ---
+  - interval: 1m
+    input_series:
+      - series: 'bragi_transcodes'
+        values: '2x5'
+    alert_rule_test:
+      - eval_time: 3m
+        alertname: BragiMasDeUnTranscode
+        exp_alerts:
+          - exp_labels: {severity: warning, servicio: bragi}
+            exp_annotations:
+              resumen: "Bragi está haciendo más de un transcode a la vez"
+              descripcion: "Con el tope de 3 CPU solo cabe uno a tiempo real (ADR-0002): los demás se entrecortan. Ver qué clientes no reproducen en directo."
+
+  # --- BragiCpuAltaSinTranscode: >80 % del tope 20 min sin transcodificar ---
+  - interval: 1m
+    input_series:
+      - series: 'bragi_cpu_usage_seconds_total'
+        values: '0+162x40'
+      - series: 'bragi_cpu_limit_cores'
+        values: '3x40'
+      - series: 'bragi_transcodes'
+        values: '0x40'
+    alert_rule_test:
+      - eval_time: 30m
+        alertname: BragiCpuAltaSinTranscode
+        exp_alerts:
+          - exp_labels: {severity: warning, servicio: bragi}
+            exp_annotations:
+              resumen: "Bragi usa más del 80 % de su tope de CPU sin ningún transcode"
+              descripcion: "Suele ser una tarea pesada fuera de la ventana de madrugada o un proceso atascado. Comprobar con politicas.sh --verificar y el panel de tareas de Jellyfin."
+  # ...con un transcode en curso es lo esperado, no alerta
+  - interval: 1m
+    input_series:
+      - series: 'bragi_cpu_usage_seconds_total'
+        values: '0+162x40'
+      - series: 'bragi_cpu_limit_cores'
+        values: '3x40'
+      - series: 'bragi_transcodes'
+        values: '1x40'
+    alert_rule_test:
+      - eval_time: 30m
+        alertname: BragiCpuAltaSinTranscode
+        exp_alerts: []
+
+  # --- BragiMemoriaAlta: memoria anónima >85 % del tope (la caché no cuenta) ---
+  - interval: 1m
+    input_series:
+      - series: 'bragi_memory_bytes{tipo="anon"}'
+        values: '1900000000x20'
+      - series: 'bragi_memory_bytes{tipo="total"}'
+        values: '2100000000x20'
+      - series: 'bragi_memory_limit_bytes'
+        values: '2147483648x20'
+    alert_rule_test:
+      - eval_time: 17m
+        alertname: BragiMemoriaAlta
+        exp_alerts:
+          - exp_labels: {severity: warning, servicio: bragi}   # la division con on() no conserva `tipo`
+            exp_annotations:
+              resumen: "La memoria de Bragi pasa del 85 % de su tope de 2 GiB"
+              descripcion: "Cerca del tope el kernel mata procesos del contenedor (OOM). Revisar transcodes y tareas en curso."
+
+  # --- BragiTranscodeConWanDegradada: la pregunta original del diseño ---
+  - interval: 1m
+    input_series:
+      - series: 'bragi_transcodes'
+        values: '1x5'
+      - series: 'ALERTS{alertname="WanDegradada", alertstate="firing", wan="wan2"}'
+        values: '1x5'
+    alert_rule_test:
+      - eval_time: 2m
+        alertname: BragiTranscodeConWanDegradada
+        exp_alerts:
+          - exp_labels: {severity: info, servicio: bragi}
+            exp_annotations:
+              resumen: "Hay un transcode de Bragi en curso mientras una WAN está degradada"
+              descripcion: "Correlación para revisar si el transcode afecta al router (RNF02). Con el tope y cpu_shares no debería: si coincide a menudo, revisar ADR-0002."

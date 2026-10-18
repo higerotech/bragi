@@ -14,6 +14,7 @@ permissions:
 
 env:
   JELLYFIN: jellyfin/jellyfin:10.11.11@sha256:aefb67e6a7ff1debdd154a78a7bbb780fd0c873d8639210a7f6a2016ad2b35db
+  PROMETHEUS: prom/prometheus:v3.14.0   # la misma version que Mimir en Yggdrasil
   CLOUDFLARED: cloudflare/cloudflared:2026.8.3@sha256:51c9cefcb4569df44e1ad403ab1d3d8065aa8e84339bcfc6aee75502e1140339
 
 jobs:
@@ -29,6 +30,7 @@ jobs:
           export IMAGE_TAG=sha-0000000
           docker compose --env-file .env.example config -q
           COMPOSE_PROFILES=tunel TUNNEL_TOKEN=ci docker compose --env-file .env.example config -q
+          COMPOSE_PROFILES=tunel,metricas TUNNEL_TOKEN=ci docker compose --env-file .env.example config -q
       - name: El puerto nunca se publica en 0.0.0.0 (RS01)
         working-directory: deploy
         run: |
@@ -44,6 +46,10 @@ jobs:
             | while read -r img; do
                 case "$img" in *@sha256:*) echo "ok  $img" ;; *) echo "SIN DIGEST: $img"; exit 1 ;; esac
               done
+      - name: Reglas de Heimdall (promtool check y pruebas unitarias)
+        run: |
+          docker run --rm -v "$PWD/deploy/prometheus:/p:ro" -w /p --entrypoint promtool "$PROMETHEUS" check rules bragi-alertas.yml
+          docker run --rm -v "$PWD/deploy/prometheus:/p:ro" -w /p --entrypoint promtool "$PROMETHEUS" test rules bragi-alertas.test.yml
       - name: Construir bragi-sync
         run: docker build -q -t bragi-sync:ci deploy/sync
       - name: config.sh rechaza valores invalidos y escribe los validos
@@ -62,12 +68,13 @@ jobs:
       - name: ShellCheck
         run: |
           docker run --rm -v "$PWD:/mnt:ro" -w /mnt koalaman/shellcheck:v0.10.0 -S warning \
-            deploy/scripts/*.sh deploy/sync/*.sh deploy/tests/*.sh deploy/cd/*.sh deploy/respaldo/*.sh
+            deploy/scripts/*.sh deploy/sync/*.sh deploy/tests/*.sh deploy/cd/*.sh deploy/respaldo/*.sh deploy/metricas/*.sh
       - name: Unidad systemd (sintaxis)
         run: |
           sudo install -m 0755 /bin/true /usr/local/sbin/bragi-arranque.sh
           sudo install -m 0755 /bin/true /usr/local/sbin/bragi-respaldar.sh
-          systemd-analyze verify deploy/cd/bragi-arranque.service deploy/respaldo/bragi-respaldo.service deploy/respaldo/bragi-respaldo.timer
+          sudo install -m 0755 /bin/true /usr/local/sbin/bragi-recolectar.sh
+          systemd-analyze verify deploy/cd/bragi-arranque.service deploy/respaldo/bragi-respaldo.service deploy/respaldo/bragi-respaldo.timer deploy/metricas/bragi-metricas.service deploy/metricas/bragi-metricas.timer
 
   integracion:
     name: "Integracion: frontera de confianza (Jellyfin real)"
