@@ -27,6 +27,13 @@ extremo a extremo y SLO revisados con datos reales. Yggdrasil ya tiene el job y 
   pruebas unitarias de `promtool` en el CI.
 - `docs/06-monitoring/observability.md` con C4 Dynamic, secuencia, estado del incidente y timeline.
 
+### Corregido
+- **El segundo despliegue de una release ya no recrea los contenedores de `bragi-sync`.** El
+  relanzamiento de `build` que pide `redespliegue` (cuando el commit cambia el Compose)
+  reconstruía la imagen. Como el build no es reproducible, subía otro digest con el mismo tag
+  `sha-<7>` y el receptor recreaba todo lo que usa esa imagen. Ahora, si la imagen del commit ya
+  está en GHCR, `build` no la reconstruye. Es el mismo arreglo que yggdrasil#70.
+
 ### Cambiado
 - `respaldar.sh` escribe `/var/lib/bragi-respaldo/ultimo-exito` tras cada respaldo verificado.
 - `bragi-sync` incluye `busybox-extras` (el `httpd` de `bragi-metricas`).
