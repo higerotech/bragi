@@ -19,7 +19,7 @@ La biblioteca del NAS tiene permisos `777` (comprobado el 2026-09-18), así que 
 uid del operador para leerla.
 
 ## Decisión
-`bootstrap-midgard.sh` crea el usuario de sistema `bragi`: sin shell, sin home propio y con los
+`bootstrap.sh` (antes `bootstrap-midgard.sh`) crea el usuario de sistema `bragi`: sin shell, sin home propio y con los
 grupos `render` y `video` para `/dev/dri`. `PUID`/`PGID` del `.env` son los suyos y
 `/var/lib/bragi` le pertenece con modo `0750`.
 

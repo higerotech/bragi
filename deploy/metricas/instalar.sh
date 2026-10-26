@@ -2,9 +2,12 @@
 # Instala el recolector de metricas de Bragi en el appliance (Gate 5, ADR-0009). Idempotente.
 #   sudo bash deploy/metricas/instalar.sh
 #
-# Despues hay que activar el perfil `metricas` en deploy/.env (COMPOSE_PROFILES) para que el
-# receptor levante bragi-metricas, y desplegar en Yggdrasil el job y las reglas de
-# deploy/prometheus/.
+# Con el Compose de Yggdrasil en el mismo host (midgard): activar despues el perfil `metricas` en
+# deploy/.env (COMPOSE_PROFILES) para que el receptor levante bragi-metricas en la red heimdall.
+# En un host sin ese Compose (nidavellir, ADR-0010) no hay red heimdall: el textfile va al
+# directorio que ya sirve Thor por la LAN, solo a midgard, y el perfil `metricas` queda apagado:
+#   sudo BRAGI_METRICAS_DIR=/var/lib/yggdrasil-thor bash deploy/metricas/instalar.sh
+# En los dos casos, el job y las reglas de deploy/prometheus/ van al prometheus.yml de Yggdrasil.
 set -euo pipefail
 
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -28,6 +31,12 @@ if [ ! -s "$ESTADO_DIR/ultimo-exito" ] && ls "$RESPALDOS" >/dev/null 2>&1; then
 fi
 
 echo "== 3. Recolector y timer"
+if [ "$SALIDA" != /var/lib/bragi-metricas ]; then
+    echo "BRAGI_METRICAS_DIR=$SALIDA" > /etc/default/bragi-metricas
+    echo "   textfile en $SALIDA (/etc/default/bragi-metricas)"
+else
+    rm -f /etc/default/bragi-metricas
+fi
 install -m 0755 "$DIR/recolectar.sh" /usr/local/sbin/bragi-recolectar.sh
 install -m 0644 "$DIR/bragi-metricas.service" /etc/systemd/system/bragi-metricas.service
 install -m 0644 "$DIR/bragi-metricas.timer" /etc/systemd/system/bragi-metricas.timer

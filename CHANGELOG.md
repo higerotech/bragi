@@ -9,6 +9,22 @@ El cierre de cada gate AI-DLC corta versión (Gate 0 → 0.1.0, Gate 1 → 0.2.0
 
 ## [Unreleased]
 
+### Cambiado
+- **Bragi se muda a nidavellir** (ADR-0010).
+  - El NAS no tiene sitio y las películas ya están en el disco WD de nidavellir.
+  - nidavellir no es el router y su Vega decodifica HEVC 10 bit.
+  - La biblioteca se reparte sin cambiar las rutas del contenedor: `MEDIA_PATH` reúne el
+    automount NFS de las series y un bind de solo lectura de las películas.
+  - `bragi-arranque` espera a cada montaje de `MEDIA_MONTAJES`. Sin el disco de las películas
+    no levanta Jellyfin.
+  - Despliega el reconciliador del receptor de nidavellir, no el webhook.
+  - Las métricas las sirve el httpd de Thor (`BRAGI_METRICAS_DIR`, `/etc/default/bragi-metricas`),
+    no `bragi-metricas`.
+  - El job de `deploy/prometheus/bragi-job.yml` apunta a nidavellir.
+- `deploy/cd/bootstrap-midgard.sh` pasa a `deploy/cd/bootstrap.sh`. Acepta `BIBLIOTECA`,
+  `PELICULAS_ORIGEN` y `NAS`, y declara la biblioteca repartida en `/etc/fstab`.
+- Runbook de la mudanza y su rollback en `docs/05-deployment/deployment.md`.
+
 ## [0.6.0-rc.1] - 2026-10-18
 
 **Candidata del Gate 5 (Monitoring).** Lleva a `main` la observabilidad en Heimdall. Su build publica

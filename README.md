@@ -1,8 +1,9 @@
 # Bragi
 
-Servidor de medios doméstico sobre [Jellyfin](https://jellyfin.org), desplegado en el appliance
-de red de la casa (Ubuntu Server 24.04, i3-3240) **con topes de CPU y memoria** para que el
-streaming nunca degrade el enrutamiento. Documentación bajo la metodología AI-DLC.
+Servidor de medios doméstico sobre [Jellyfin](https://jellyfin.org), con topes de CPU y memoria.
+Hasta la ADR-0010 corrió en el appliance de red de la casa (midgard, i3-3240), donde los topes
+protegían el enrutamiento. Ahora corre en nidavellir, el segundo servidor de la LAN (Ryzen 3
+2200G), con las películas en su disco local. Documentación bajo la metodología AI-DLC.
 
 Bragi es el dios nórdico de la poesía, el bardo de Valhalla: el que cuenta las historias. Es
 repo hermano de [Yggdrasil](https://github.com/higerotech/yggdrasil) (monitor de las WAN) y

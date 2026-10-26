@@ -1,4 +1,5 @@
-# Bragi — servidor de medios (Jellyfin) en el appliance midgard.
+# Bragi — servidor de medios (Jellyfin). Corre en nidavellir desde la ADR-0010; hasta entonces,
+# en el appliance midgard (los numeros de abajo y los topes son de alli).
 #
 # Lo despliega el receptor de higerotech/despliegue-continuo (ADR-0003): en cada despliegue
 # el servicio `sync` hace checkout del commit IMAGE_TAG en el clon y el resto se levanta con
@@ -87,8 +88,9 @@ services:
       - "${HOST_LAN_IP:?define HOST_LAN_IP en .env}:8096:8096"
     networks: [bragi]
 
-    # iGPU Intel HD 2500 (Gen7): NO decodifica HEVC, que es justo lo que habria que
-    # transcodificar. Se mapea porque no cuesta nada; VAAPI no resuelve el cuello (ADR-0002).
+    # midgard: iGPU Intel HD 2500 (Gen7), NO decodifica HEVC; VAAPI no resolvia el cuello (ADR-0002).
+    # nidavellir: Radeon Vega 8 (Raven Ridge), que si decodifica HEVC 10 bit. Activar VAAPI en
+    # Jellyfin es una decision aparte, con su medida (ADR-0010).
     devices:
       - /dev/dri:/dev/dri
 
@@ -97,10 +99,11 @@ services:
       # se corrompe, y el clon lo reescribe el sync en cada despliegue.
       - ${BRAGI_DATA:-/var/lib/bragi}/config:/config
       - ${BRAGI_DATA:-/var/lib/bragi}/cache:/cache
-      # Biblioteca del NAS, SOLO LECTURA y con propagacion rslave (ADR-0005). El punto de
-      # montaje del host es un autofs con idle-timeout: con la propagacion por defecto
-      # (rprivate) el contenedor se queda con la vista del arranque y ve el directorio vacio
-      # tras el primer desmontaje. Comprobado en midgard el 2026-09-17.
+      # Biblioteca, SOLO LECTURA y con propagacion rslave (ADR-0005). El punto de montaje del
+      # host es un autofs con idle-timeout: con la propagacion por defecto (rprivate) el
+      # contenedor se queda con la vista del arranque y ve el directorio vacio tras el primer
+      # desmontaje. Comprobado en midgard el 2026-09-17. En nidavellir, MEDIA_PATH reune el
+      # automount de las series (TV) y el bind del disco de las peliculas (movies): ADR-0010.
       - type: bind
         source: ${MEDIA_PATH:-/mnt/nas/media}
         target: /media
@@ -159,7 +162,8 @@ services:
 
   # --- Metricas para Heimdall (ADR-0009) ---
   # Sirve el textfile que escribe bragi-metricas.timer en el host. Solo en la red de Heimdall:
-  # sin puertos publicados ni reglas nuevas en el firewall del router. Perfil `metricas`.
+  # sin puertos publicados ni reglas nuevas en el firewall del router. Perfil `metricas`, solo
+  # donde corre el Compose de Yggdrasil; en nidavellir lo sirve Thor (ADR-0010).
   metricas:
     image: ghcr.io/higerotech/bragi-sync:${IMAGE_TAG:?IMAGE_TAG es obligatorio}
     container_name: bragi-metricas
