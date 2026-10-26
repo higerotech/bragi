@@ -9,6 +9,12 @@ El cierre de cada gate AI-DLC corta versión (Gate 0 → 0.1.0, Gate 1 → 0.2.0
 
 ## [Unreleased]
 
+## [0.6.0-rc.2] - 2026-10-26
+
+**Bragi corre en nidavellir** (ADR-0010). El corte se hizo el 2026-10-26, de 13:45:33 a 13:47:55 UTC,
+y conserva el mismo `Id` de servidor, los usuarios y el progreso. Sigue siendo candidata: el Gate 5 se
+cierra al revisar los SLO con datos reales, ahora los de nidavellir.
+
 ### Cambiado
 - **Bragi se muda a nidavellir** (ADR-0010).
   - El NAS no tiene sitio y las películas ya están en el disco WD de nidavellir.
@@ -217,7 +223,8 @@ publica la primera `bragi-sync` para el receptor.
   escenarios de abuso, C4 de contexto, journey, requirementDiagram, DFD y DREAD inicial.
 - Checklists de gates 0–5.
 
-[Unreleased]: https://github.com/higerotech/bragi/compare/v0.6.0-rc.1...HEAD
+[Unreleased]: https://github.com/higerotech/bragi/compare/v0.6.0-rc.2...HEAD
+[0.6.0-rc.2]: https://github.com/higerotech/bragi/compare/v0.6.0-rc.1...v0.6.0-rc.2
 [0.6.0-rc.1]: https://github.com/higerotech/bragi/compare/v0.5.0...v0.6.0-rc.1
 [0.5.0]: https://github.com/higerotech/bragi/compare/v0.5.0-rc.1...v0.5.0
 [0.5.0-rc.1]: https://github.com/higerotech/bragi/compare/v0.4.0...v0.5.0-rc.1
