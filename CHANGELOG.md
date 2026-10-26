@@ -30,6 +30,8 @@ cierra al revisar los SLO con datos reales, ahora los de nidavellir.
 - `deploy/cd/bootstrap-midgard.sh` pasa a `deploy/cd/bootstrap.sh`. Acepta `BIBLIOTECA`,
   `PELICULAS_ORIGEN` y `NAS`, y declara la biblioteca repartida en `/etc/fstab`.
 - Runbook de la mudanza y su rollback en `docs/05-deployment/deployment.md`.
+- `cloudflared` del túnel pasa de 2026.8.3 a 2026.10.4, fijado por digest. Trae correcciones de
+  seguridad (VULN-141859, VULN-176088) y del corte de mensajes grandes (TUN-10994).
 
 ## [0.6.0-rc.1] - 2026-10-18
 
