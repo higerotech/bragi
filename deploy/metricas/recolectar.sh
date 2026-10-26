@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # recolectar.sh — metricas de Bragi para Heimdall (Gate 5, ADR-0009).
 #
-# Lo lanza bragi-metricas.timer cada 30 s. Escribe un textfile de Prometheus que sirve el
-# contenedor bragi-metricas (busybox httpd) SOLO en la red yggdrasil_heimdall: sin puertos
-# publicados ni reglas nuevas en el firewall del router.
+# Lo lanza bragi-metricas.timer cada 30 s. Escribe un textfile de Prometheus. Lo sirve el
+# contenedor bragi-metricas (busybox httpd) SOLO en la red yggdrasil_heimdall cuando Bragi corre
+# junto a Yggdrasil; en nidavellir (ADR-0010) lo sirve el httpd de Thor, que solo admite a midgard.
 #
 # De donde sale cada cosa:
 #   - CPU, throttling y memoria: el cgroup del contenedor. Es la unica fuente que ve tambien a

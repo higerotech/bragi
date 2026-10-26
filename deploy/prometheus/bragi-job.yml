@@ -1,8 +1,8 @@
 # Job de scrape de Bragi — ADR-0009.
 #
 # ESPECIFICACION: se instala en el bloque `scrape_configs` del prometheus.yml de
-# higerotech/yggdrasil. El objetivo es el contenedor bragi-metricas en la red yggdrasil_heimdall:
-# el puerto 9470 no se publica.
+# higerotech/yggdrasil. Bragi corre en nidavellir (ADR-0010): el textfile lo sirve alli el httpd de
+# Thor (:9471, solo admite a midgard). La IP es de ejemplo (RFC 5737); la real va en Yggdrasil.
 - job_name: bragi
   scrape_interval: 30s
   metrics_path: /bragi.prom
@@ -10,4 +10,4 @@
   # (mismo caso que Sleipnir).
   fallback_scrape_protocol: PrometheusText0.0.4
   static_configs:
-    - targets: ["bragi-metricas:9470"]
+    - targets: ["192.0.2.2:9471"]
