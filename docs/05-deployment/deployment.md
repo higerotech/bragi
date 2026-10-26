@@ -4,7 +4,7 @@
 * **Fecha:** 2026-09-18
 * **Decisores:** Jeremi
 * **Fase AI-DLC:** 05-deployment
-* **Versión:** 0.5.0
+* **Versión:** 0.6.0 (mudanza a nidavellir, ADR-0010)
 * **Gate:** 4
 
 Runbook para pasar del Jellyfin manual (`~/jellyfin`) a Bragi desplegado por el receptor de
@@ -121,7 +121,7 @@ rm -rf ~/bragi-staging
 ### 4. Bootstrap del appliance
 
 ```bash
-sudo BRANCH=main TZ_HOGAR=<zona de la casa> bash /ruta/al/clon/deploy/cd/bootstrap-midgard.sh
+sudo BRANCH=main TZ_HOGAR=<zona de la casa> BIBLIOTECA=/mnt/nas/media bash /ruta/al/clon/deploy/cd/bootstrap.sh
 ```
 
 Crea el usuario `bragi` (ADR-0007), `/var/lib/bragi`, el clon en `/srv/apps/bragi`,
@@ -191,3 +191,81 @@ Si Bragi no queda sano tras el corte, se vuelve al despliegue manual, que sigue 
 docker compose -p bragi -f /srv/apps/bragi/deploy/docker-compose.yml down
 docker update --restart unless-stopped jellyfin && docker start jellyfin
 ```
+
+## Mudanza a nidavellir (ADR-0010)
+
+Bragi pasa de midgard a nidavellir con sus datos: mismo `Id` de servidor, mismos usuarios y mismo
+progreso. Las rutas de la biblioteca no cambian (`/media/TV`, `/media/movies`). El webhook deja de
+desplegar Bragi: lo despliega el reconciliador del receptor de nidavellir.
+
+```mermaid
+gantt
+    title Mudanza de Bragi a nidavellir
+    dateFormat HH:mm
+    axisFormat %H:%M
+    section Preparación sin corte
+    bootstrap.sh en nidavellir          :a1, 00:00, 10m
+    Copia en caliente de metadata       :a2, after a1, 15m
+    Respaldo y métricas instalados      :a3, after a1, 5m
+    TUNNEL_TOKEN al .env [Jeremi]       :a4, after a1, 5m
+    section Ventana de corte
+    Bragi fuera de midgard              :crit, b1, after a2, 2m
+    Copia final de config sin metadata  :crit, b2, after b1, 3m
+    Reconciliador despliega             :crit, b3, after b2, 5m
+    section Después
+    Verificación y Mimir                :c1, after b3, 15m
+    Clientes LAN a la IP nueva [Jeremi] :c2, after c1, 30m
+```
+*Eje trazabilidad · gantt de la mudanza · ADR-0010. El servicio solo se corta en la sección
+crítica, unos 10 min.*
+
+### Preparación (sin corte)
+1. **bootstrap.sh en nidavellir**, desde un clon temporal:
+   ```bash
+   sudo BRANCH=main TZ_HOGAR=America/Caracas LAN_IF=<interfaz> NAS=<ip-del-nas> \
+        PELICULAS_ORIGEN=/srv/medios/wd/peliculas bash deploy/cd/bootstrap.sh
+   ```
+   - Hace lo mismo que en midgard (usuario `bragi`, `/var/lib/bragi`, clon, `.env`, `apps.yml`,
+     `bragi-arranque`).
+   - Además declara la biblioteca repartida en `/etc/fstab`.
+   - El receptor no despliega todavía: sin `RECONCILE_INTERVAL` y sin webhook, nada lo dispara.
+2. **Copia en caliente de `metadata/`** (3,3 GB, son carátulas: si queda algo vieja, el siguiente
+   escaneo la completa). Pasa de midgard a nidavellir con `tar` por ssh. Termina con
+   `chown -R bragi: /var/lib/bragi`.
+3. **Respaldo y métricas:**
+   ```bash
+   sudo NAS=<ip-del-nas> bash deploy/respaldo/instalar.sh
+   sudo BRAGI_METRICAS_DIR=/var/lib/yggdrasil-thor bash deploy/metricas/instalar.sh
+   ```
+4. **[Jeremi]** Pasar `TUNNEL_TOKEN`, `PUBLISHED_URL` y `COMPOSE_PROFILES=tunel` del `.env` de
+   midgard al de nidavellir, de servidor a servidor y sin que se impriman. `COMPOSE_PROFILES`
+   no lleva `metricas`: en nidavellir no existe la red `yggdrasil_heimdall`.
+
+### Ventana de corte
+1. **midgard:**
+   - Quitar la app `bragi` de `/etc/cd-receiver/apps.yml`, con copia en `/root`, y hacer `reload`.
+   - `docker compose -p bragi down`.
+   - Deshabilitar `bragi-arranque.service`, `bragi-metricas.timer` y `bragi-respaldo.timer`.
+   - `/var/lib/bragi` se queda tal cual: es el rollback.
+2. **Copia final** de `config/` sin `metadata/` (unos 100 MB, con la base ya parada) y `chown`.
+3. **nidavellir:** `RECONCILE_INTERVAL=60` en `receiver.env` y reiniciar el receptor. Sin
+   estado previo, encola el último `build` correcto de `main`: `sync`, `config`, Jellyfin y el
+   túnel.
+4. **Verificación:**
+   - `/health` en `192.168.10.2:8096`.
+   - El mismo `Id` en `/System/Info/Public`.
+   - `https://<publica>/health` por el túnel.
+   - `bragi-arranque` habilitada.
+   - `verificar-produccion.sh`.
+5. **Yggdrasil:** el job `bragi` de `prometheus.yml` pasa a `192.168.10.2:9471`. Hasta que se
+   despliegue, `BragiSinMetricas` dispara.
+6. **Thor de nidavellir:**
+   - `bragi` y `bragi-tunel` en `THOR_CONTENEDORES`.
+   - `bragi-arranque.service`, `bragi-respaldo.timer` y `bragi-metricas.timer` en
+     `THOR_UNIDADES`.
+
+### Rollback de la mudanza
+1. nidavellir: `docker compose -p bragi down` y quitar la app de su `apps.yml`.
+2. midgard: devolver la app al `apps.yml` desde la copia de `/root`, hacer `reload`, rehabilitar
+   las unidades y ejecutar `bragi-arranque.sh`. Lo que se vio en nidavellir entre medias se
+   pierde.

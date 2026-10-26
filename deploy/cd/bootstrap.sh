@@ -1,10 +1,13 @@
 #!/usr/bin/env bash
-# Prepara el appliance para desplegar Bragi con el receptor de despliegue-continuo (ADR-0003).
-# Idempotente y sin secretos. Ejecutar como root:
-#   sudo BRANCH=main TZ_HOGAR=America/Caracas bash deploy/cd/bootstrap-midgard.sh
+# Prepara un host para desplegar Bragi con el receptor de despliegue-continuo (ADR-0003).
+# Idempotente y sin secretos. Ejecutar como root. En nidavellir (ADR-0010: series en el NAS,
+# peliculas en el disco WD):
+#   sudo BRANCH=main TZ_HOGAR=America/Caracas LAN_IF=enp3s0 NAS=<ip del NAS> \
+#        PELICULAS_ORIGEN=/srv/medios/wd/peliculas bash deploy/cd/bootstrap.sh
+# Con la biblioteca entera en el NAS (el caso de midgard hasta la ADR-0010), sin PELICULAS_ORIGEN
+# y con BIBLIOTECA=/mnt/nas/media.
 #
-# NO migra datos ni para nada: eso es deploy/cd/migrar-desde-manual.sh, en la ventana de corte.
-# Despues: webhook en GitHub (docs/05-deployment/deployment.md, paso 3).
+# NO migra datos ni para nada: la mudanza va en la ventana de corte (docs/05-deployment/deployment.md).
 set -euo pipefail
 
 APP_DIR=${APP_DIR:-/srv/apps/bragi}
@@ -13,8 +16,12 @@ BRANCH=${BRANCH:-main}
 LAN_IF=${LAN_IF:-lan}
 DATOS=${BRAGI_DATA:-/var/lib/bragi}
 APPS_YML=/etc/cd-receiver/apps.yml
+BIBLIOTECA=${BIBLIOTECA:-/srv/medios/bragi}   # el contenedor la ve como /media
+PELICULAS_ORIGEN=${PELICULAS_ORIGEN:-}         # vacio: la biblioteca entera viene del NAS
+NAS=${NAS:-}
 
 [ "$(id -u)" = 0 ] || { echo "ejecutar con sudo"; exit 1; }
+[ -z "$PELICULAS_ORIGEN" ] || [ -n "$NAS" ] || { echo "con PELICULAS_ORIGEN hace falta NAS (las series)"; exit 1; }
 id deploy >/dev/null 2>&1 || { echo "no existe el usuario deploy: instalar despliegue-continuo primero"; exit 1; }
 
 echo "== 1. Usuario de sistema bragi (ADR-0007)"
@@ -51,6 +58,12 @@ if [ ! -f "$ENV_FILE" ]; then
     fijar HOST_LAN_IP "$LAN_IP"
     fijar LAN_SUBNET "$LAN_SUBNET"
     fijar BRAGI_DATA "$DATOS"
+    fijar MEDIA_PATH "$BIBLIOTECA"
+    if [ -n "$PELICULAS_ORIGEN" ]; then
+        fijar MEDIA_MONTAJES "\"$BIBLIOTECA/TV $BIBLIOTECA/movies\""
+    else
+        sed -i '/^MEDIA_MONTAJES=/d' "$ENV_FILE"
+    fi
     fijar PUID "$(id -u bragi)"
     fijar PGID "$(id -g bragi)"
     fijar RENDER_GID "$(getent group render | cut -d: -f3)"
@@ -72,7 +85,7 @@ fi
 echo "== 5. Inventario del receptor ($APPS_YML)"
 if ! grep -q 'repo: higerotech/bragi' "$APPS_YML"; then
     cp -a "$APPS_YML" "/root/apps.yml.bak-$(date +%Y%m%d-%H%M%S)"   # fuera de /etc/cd-receiver
-    sed "s|http://192.0.2.1:8096|http://$LAN_IP:8096|" "$APP_DIR/deploy/cd/apps.bragi.yml" >> "$APPS_YML"
+    sed "s|http://192.0.2.2:8096|http://$LAN_IP:8096|" "$APP_DIR/deploy/cd/apps.bragi.yml" >> "$APPS_YML"
     curl -fsS -X POST http://127.0.0.1:9000/reload >/dev/null && echo "   anadido y receptor recargado"
 else
     echo "   ya declarado"
@@ -84,4 +97,30 @@ install -m 0644 "$APP_DIR/deploy/cd/bragi-arranque.service" /etc/systemd/system/
 systemctl daemon-reload
 systemctl enable bragi-arranque.service >/dev/null 2>&1 && echo "   bragi-arranque.service habilitada"
 
-echo "== Listo. Siguiente: webhook en GitHub y ventana de corte (docs/05-deployment/deployment.md)."
+echo "== 7. Biblioteca repartida en $BIBLIOTECA (ADR-0010)"
+if [ -n "$PELICULAS_ORIGEN" ]; then
+    [ -d "$PELICULAS_ORIGEN" ] || { echo "   no existe $PELICULAS_ORIGEN"; exit 1; }
+    install -d -m 0755 "$BIBLIOTECA" "$BIBLIOTECA/TV" "$BIBLIOTECA/movies"
+    nuevas=()
+    # Series: un automount propio del subdirectorio del export, como el resto de shares del NAS.
+    # Asi el autofs queda en $BIBLIOTECA/TV y el rslave de compose lo propaga igual que en midgard.
+    grep -q "[[:space:]]$BIBLIOTECA/TV[[:space:]]" /etc/fstab || nuevas+=(
+        "$NAS:/nfs/media/TV  $BIBLIOTECA/TV  nfs  ro,vers=3,hard,noatime,rsize=1048576,x-systemd.automount,x-systemd.idle-timeout=600,_netdev  0  0")
+    # Peliculas: bind de solo lectura del disco local. nofail: si el disco no monta, el bind falla,
+    # el directorio queda vacio y bragi-arranque no levanta Jellyfin (no veria las peliculas borradas).
+    grep -q "[[:space:]]$BIBLIOTECA/movies[[:space:]]" /etc/fstab || nuevas+=(
+        "$PELICULAS_ORIGEN  $BIBLIOTECA/movies  none  bind,ro,nofail,x-systemd.requires-mounts-for=$PELICULAS_ORIGEN  0  0")
+    if [ "${#nuevas[@]}" -gt 0 ]; then
+        cp -a /etc/fstab "/etc/fstab.bak-$(date +%Y%m%d-%H%M%S)"
+        printf '%s\n' "${nuevas[@]}" >> /etc/fstab
+        systemctl daemon-reload
+        echo "   ${#nuevas[@]} entrada(s) en /etc/fstab"
+    fi
+    systemctl start "$(systemd-escape --path --suffix=automount "$BIBLIOTECA/TV")" \
+        "$(systemd-escape --path --suffix=mount "$BIBLIOTECA/movies")"
+    echo "   TV: $(ls "$BIBLIOTECA/TV" | wc -l) entradas; movies: $(ls "$BIBLIOTECA/movies" | wc -l) entradas"
+else
+    echo "   biblioteca entera en el NAS ($BIBLIOTECA)"
+fi
+
+echo "== Listo. Siguiente: ventana de corte (docs/05-deployment/deployment.md)."

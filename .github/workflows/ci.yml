@@ -15,7 +15,7 @@ permissions:
 env:
   JELLYFIN: jellyfin/jellyfin:10.11.11@sha256:aefb67e6a7ff1debdd154a78a7bbb780fd0c873d8639210a7f6a2016ad2b35db
   PROMETHEUS: prom/prometheus:v3.14.0   # la misma version que Mimir en Yggdrasil
-  CLOUDFLARED: cloudflare/cloudflared:2026.8.3@sha256:51c9cefcb4569df44e1ad403ab1d3d8065aa8e84339bcfc6aee75502e1140339
+  CLOUDFLARED: cloudflare/cloudflared:2026.10.4@sha256:c6c7ae1d5dfdcb094ad344ed68ccffc26635c9c6be80965664c33baf064b0515
 
 jobs:
   configs:

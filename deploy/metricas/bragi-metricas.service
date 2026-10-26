@@ -5,6 +5,8 @@ After=docker.service
 
 [Service]
 Type=oneshot
+# BRAGI_METRICAS_DIR, si el textfile no va al directorio por defecto (lo escribe instalar.sh)
+EnvironmentFile=-/etc/default/bragi-metricas
 ExecStart=/usr/local/sbin/bragi-recolectar.sh
 Nice=10
 TimeoutStartSec=60

@@ -6,7 +6,7 @@
 * **Fase AI-DLC:** 02-design
 * **Versión:** 1.0.0
 * **ID:** ADR-0005
-* **Supersede / Superseded-by:** —
+* **Supersede / Superseded-by:** la ADR-0010 reparte la biblioteca (series en el NAS, películas en un disco local); el rslave sigue
 * **Controles OWASP afectados:** A01 (mínimo privilegio sobre la biblioteca)
 
 ## Contexto

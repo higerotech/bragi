@@ -6,7 +6,7 @@
 * **Fase AI-DLC:** 02-design
 * **Versión:** 1.1.0
 * **ID:** ADR-0002
-* **Supersede / Superseded-by:** —
+* **Supersede / Superseded-by:** el placement lo modifica la ADR-0010 (Bragi en nidavellir); los topes siguen
 * **Controles OWASP afectados:** A06 (diseño inseguro: disponibilidad del router)
 
 ## Contexto

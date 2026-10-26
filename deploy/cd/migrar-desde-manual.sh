@@ -16,7 +16,7 @@ forzar=0
 [ "${1:-}" = "--forzar" ] && forzar=1
 
 [ "$(id -u)" = 0 ] || { echo "ejecutar con sudo"; exit 1; }
-id bragi >/dev/null 2>&1 || { echo "falta el usuario bragi: ejecutar antes bootstrap-midgard.sh"; exit 1; }
+id bragi >/dev/null 2>&1 || { echo "falta el usuario bragi: ejecutar antes bootstrap.sh"; exit 1; }
 [ -d "$ORIGEN/config" ] || { echo "no existe $ORIGEN/config"; exit 1; }
 
 echo "== 1. Comprobaciones"
