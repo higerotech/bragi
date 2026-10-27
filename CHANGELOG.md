@@ -9,6 +9,12 @@ El cierre de cada gate AI-DLC corta versión (Gate 0 → 0.1.0, Gate 1 → 0.2.0
 
 ## [Unreleased]
 
+## [0.6.0-rc.2] - 2026-10-26
+
+**Bragi corre en nidavellir** (ADR-0010). El corte se hizo el 2026-10-26, de 13:45:33 a 13:47:55 UTC,
+y conserva el mismo `Id` de servidor, los usuarios y el progreso. Sigue siendo candidata: el Gate 5 se
+cierra al revisar los SLO con datos reales, ahora los de nidavellir.
+
 ### Cambiado
 - **Bragi se muda a nidavellir** (ADR-0010).
   - El NAS no tiene sitio y las películas ya están en el disco WD de nidavellir.
@@ -24,6 +30,8 @@ El cierre de cada gate AI-DLC corta versión (Gate 0 → 0.1.0, Gate 1 → 0.2.0
 - `deploy/cd/bootstrap-midgard.sh` pasa a `deploy/cd/bootstrap.sh`. Acepta `BIBLIOTECA`,
   `PELICULAS_ORIGEN` y `NAS`, y declara la biblioteca repartida en `/etc/fstab`.
 - Runbook de la mudanza y su rollback en `docs/05-deployment/deployment.md`.
+- `cloudflared` del túnel pasa de 2026.8.3 a 2026.10.4, fijado por digest. Trae correcciones de
+  seguridad (VULN-141859, VULN-176088) y del corte de mensajes grandes (TUN-10994).
 
 ## [0.6.0-rc.1] - 2026-10-18
 
@@ -217,7 +225,8 @@ publica la primera `bragi-sync` para el receptor.
   escenarios de abuso, C4 de contexto, journey, requirementDiagram, DFD y DREAD inicial.
 - Checklists de gates 0–5.
 
-[Unreleased]: https://github.com/higerotech/bragi/compare/v0.6.0-rc.1...HEAD
+[Unreleased]: https://github.com/higerotech/bragi/compare/v0.6.0-rc.2...HEAD
+[0.6.0-rc.2]: https://github.com/higerotech/bragi/compare/v0.6.0-rc.1...v0.6.0-rc.2
 [0.6.0-rc.1]: https://github.com/higerotech/bragi/compare/v0.5.0...v0.6.0-rc.1
 [0.5.0]: https://github.com/higerotech/bragi/compare/v0.5.0-rc.1...v0.5.0
 [0.5.0-rc.1]: https://github.com/higerotech/bragi/compare/v0.4.0...v0.5.0-rc.1
